@@ -1,0 +1,10 @@
+{
+  "name": "dirvely-functions",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.1",
+    "firebase-admin": "^4.1.1",
+    "firebase-functions": "^0.5.1",
+    "moment": "^2.17.1"
+  }
+}
