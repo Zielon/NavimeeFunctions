@@ -1,3 +1,4 @@
 functions/node_modules/**
 functions/package-lock.*
 .firebaserc
+package-lock.json
