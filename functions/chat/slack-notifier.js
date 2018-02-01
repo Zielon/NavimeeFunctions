@@ -7,15 +7,16 @@ const rp = require('request-promise');
 const dateFormat = require('dateformat');
 
 const MESSAGES = 'MESSAGES';
-const DRIVELY_TEAM = '0'
-const ACCOUNT_ID = 'ADMIN_DRIVELY'
+const DRIVELY_TEAM = '0';
+const GENERAL = '1';
+const ACCOUNT_ID = 'ADMIN_DRIVELY';
 
 if(admin.apps.length == 0)
     admin.initializeApp(functions.config().firebase);
 
 var db = admin.firestore();
 
-module.exports.onRequest = functions.https.onRequest((req, res) => {
+module.exports.onRequestTeam = functions.https.onRequest((req, res) => {
   const token = req.body.token;
   if(token !== "NG6EibtP7jTf327bInzBpuvA") return;
 
@@ -33,7 +34,7 @@ module.exports.onRequest = functions.https.onRequest((req, res) => {
   res.sendStatus(200);
 });
 
-module.exports.onMessage = functions.firestore
+module.exports.onMessageTeam = functions.firestore
   .document(`${MESSAGES}/${DRIVELY_TEAM}/${MESSAGES}/{messageId}`)
   .onCreate(event => {
     var message = event.data.data();
@@ -41,15 +42,46 @@ module.exports.onMessage = functions.firestore
     if(message.idSender === ACCOUNT_ID) return;
 
     const date = new Date(message.timestamp);
-    notifySlack(message.text, message.nameSender, date).then(() => {
+    notifySlack(functions.config().slack.url, message.text, message.nameSender, date).then(() => {
         console.log(`Logged a message from ${message.nameSender}`);
     });
 });
 
-const notifySlack = (message, author, date) => {
+module.exports.onRequestGeneral = functions.https.onRequest((req, res) => {
+  const token = req.body.token;
+  if(token !== "eMdEbXYPDF4PIWZTlcn9Vy96") return;
+
+  const message = req.body.text;
+  const trigger = req.body.trigger_word;
+
+  var ref = db.collection(MESSAGES).doc(GENERAL).collection(MESSAGES).doc().set({
+    emailSender: 'kontakt@drively.pl',
+    idReceiver: GENERAL,
+    idSender: ACCOUNT_ID,
+    nameSender: 'Drively',
+    text: message.split(trigger)[1].trim(),
+    timestamp: moment().valueOf()
+  });
+  res.sendStatus(200);
+});
+
+module.exports.onMessageGeneral = functions.firestore
+  .document(`${MESSAGES}/${GENERAL}/${MESSAGES}/{messageId}`)
+  .onCreate(event => {
+    var message = event.data.data();
+
+    if(message.idSender === ACCOUNT_ID) return;
+
+    const date = new Date(message.timestamp);
+    notifySlack(functions.config().slack.url_general, message.text, message.nameSender, date).then(() => {
+        console.log(`Logged a message from ${message.nameSender}`);
+    });
+});
+
+const notifySlack = (url, message, author, date) => {
   return rp({
     method: 'POST',
-    uri: functions.config().slack.url,
+    uri: url,
     body: {
       text: message,
       color: '#D00000',
