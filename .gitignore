@@ -60,7 +60,9 @@ typings/
 # dotenv environment variables file
 .env
 
+functions/debug/config/**
 functions/node_modules/**
 functions/package-lock.*
 .firebaserc
 package-lock.json
+.vscode/**

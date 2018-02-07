@@ -3,6 +3,7 @@ import * as admin from 'firebase-admin'
 import * as rp from 'request-promise'
 
 import * as msg from './messages'
+import Channel from './channel'
 
 // Sends messages to the Slack comunicator.
 class Slack{
@@ -31,13 +32,14 @@ export default class Chat{
     private readonly MESSAGE = "MESSAGES";
     private readonly ACCOUNT_ID = "ADMIN_DRIVELY";
 
-    constructor(channel: string, url: string, token: string){
+    constructor(channel:Channel){
         if(admin.apps.length === 0)
             admin.initializeApp(functions.config().firebase);
 
         this.firestore = admin.firestore();
-        this.channel = channel;
-        this.slack = new Slack(url);
+        this.channel = channel.channelId;
+        this.token = channel.token;
+        this.slack = new Slack(channel.url);
     }
 
     public startOnDocumentListener(){

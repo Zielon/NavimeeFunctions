@@ -3,14 +3,18 @@
     "lib": ["es6"],
     "module": "commonjs",
     "noImplicitReturns": true,
+    "noImplicitAny": false,
     "outDir": "lib",
     "sourceMap": true,
     "target": "es6",
     "types" : ["node"],
-    "allowJs" : true
+    "allowJs" : true,
+    "typeRoots": [
+      "./node_modules/@types", "./typings.d.ts"
+    ]
   },
   "compileOnSave": true,
   "include": [
-    "src"
+    "src", "debug"
   ]
 }
