@@ -1,5 +1,5 @@
 import * as moment from 'moment'
-import * as df from 'dateformat'
+import dateFormat from 'dateformat'
 
 export class FirestoreMessage{
     emailSender: string;
@@ -11,11 +11,11 @@ export class FirestoreMessage{
 
     constructor(channel: string, text: string){
         this.emailSender = "kontakt@drively.pl";
-        this.nameSender = "Drively"
-        this.timestamp = moment().valueOf()
-        this.idSender = "ADMIN_DRIVELY"
-        this.idReceiver = channel
-        this.text = text
+        this.nameSender = "Drively";
+        this.timestamp = moment().valueOf();
+        this.idSender = "ADMIN_DRIVELY";
+        this.idReceiver = channel;
+        this.text = text;
     }
 }
 
@@ -26,8 +26,8 @@ class SlackFields{
 
     constructor(author: string, date: Date){
         this.short = false;
-        this.value = df.dateFormat(date, "dddd, mmmm dS, yyyy, h:MM:ss TT");
-        this.title = `Message from ${author}`
+        this.value = date.toLocaleString();
+        this.title = `Message from ${author}`;
     }
 }
 

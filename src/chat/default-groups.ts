@@ -13,8 +13,8 @@ export default class CreateDefaultGroups {
         this.firestore = admin.firestore();
     }
 
-    public defaultGroup(): void {
-        functions.firestore
+    public defaultGroup(): any {
+        return functions.firestore
             .document('USERS/{userId}')
             .onCreate(event => {
                 const id = event.params.userId;

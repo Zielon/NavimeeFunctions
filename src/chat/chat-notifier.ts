@@ -13,11 +13,12 @@ class Slack{
         this.url = url;
     }
 
-    send(message: msg.SlackMessage): Promise<void>{
+    send(message: msg.SlackMessage): Promise<any>{
         return rp({
             method: 'POST',
             uri: this.url,
-            body: message
+            body: message,
+            json: true
         })
     }
 }
@@ -42,21 +43,21 @@ export default class Chat{
         this.slack = new Slack(channel.url);
     }
 
-    public startOnDocumentListener(){
-       functions.firestore
-        .document(`${this.MESSAGE}/${this.channel}/${this.MESSAGE}/{messageId}`)
-        .onCreate(event => {
-            const message = event.data.data();
-            if(message.idSender === this.ACCOUNT_ID) return;
-            const firestoreMessage = new msg.SlackMessage(message.text, message.nameSender, new Date(message.timestamp))
-            this.slack.send(firestoreMessage)
-            .then(() => { console.log(firestoreMessage.text + " | WAS SENT SUCCESSFULLY!")})
-            .catch(() => { console.log(firestoreMessage.text + " | WAS NOT SENT!")});
-        });
+    public startOnDocumentListener(): any {
+       return functions.firestore
+            .document(`${this.MESSAGE}/${this.channel}/${this.MESSAGE}/{messageId}`)
+            .onCreate(event => {
+                const message = event.data.data();
+                if(message.idSender === this.ACCOUNT_ID) return;
+                const firestoreMessage = new msg.SlackMessage(message.text, message.nameSender, new Date(message.timestamp))
+                this.slack.send(firestoreMessage)
+                    .then(() => { console.log(firestoreMessage.text + " | WAS SENT SUCCESSFULLY!")})
+                    .catch(() => { console.log(firestoreMessage.text + " | WAS NOT SENT!")});
+            });
     }
 
-    public startOnRequestListener(){
-        functions.https.onRequest((req, res) => {
+    public startOnRequestListener(): any {
+        return functions.https.onRequest((req, res) => {
             // Prevent recursive calls
             if(req.body.token !== this.token) return;
 
