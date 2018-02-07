@@ -4,16 +4,17 @@ import * as rp from 'request-promise'
 
 import * as msg from './messages'
 import Channel from './channel'
+import { Serializable } from "./serializable";
 
 // Sends messages to the Slack comunicator.
-class Slack{
+class Slack {
     private url: string;
 
-    constructor(url: string){
+    constructor(url: string) {
         this.url = url;
     }
 
-    send(message: msg.SlackMessage): Promise<any>{
+    send(message: msg.SlackMessage): Promise<any> {
         return rp({
             method: 'POST',
             uri: this.url,
@@ -24,7 +25,7 @@ class Slack{
 }
 
 // Starts listeners for endpoints and documents creations.
-export default class Chat{
+export default class Chat {
     private firestore: any;
     private channel: string;
     private slack: Slack;
@@ -33,8 +34,8 @@ export default class Chat{
     private readonly MESSAGE = "MESSAGES";
     private readonly ACCOUNT_ID = "ADMIN_DRIVELY";
 
-    constructor(channel:Channel){
-        if(admin.apps.length === 0)
+    constructor(channel: Channel) {
+        if (admin.apps.length === 0)
             admin.initializeApp(functions.config().firebase);
 
         this.firestore = admin.firestore();
@@ -44,11 +45,11 @@ export default class Chat{
     }
 
     public startOnDocumentListener(): any {
-       return functions.firestore
+        return functions.firestore
             .document(`${this.MESSAGE}/${this.channel}/${this.MESSAGE}/{messageId}`)
             .onCreate(event => {
                 const message = event.data.data();
-                if(message.idSender === this.ACCOUNT_ID) return;
+                if (message.idSender === this.ACCOUNT_ID) return;
                 const firestoreMessage = new msg.SlackMessage(message.text, message.nameSender, new Date(message.timestamp))
                 this.slack.send(firestoreMessage);
             });
@@ -57,7 +58,7 @@ export default class Chat{
     public startOnRequestListener(): any {
         return functions.https.onRequest((req, res) => {
             // Prevent recursive calls
-            if(req.body.token !== this.token) return;
+            if (req.body.token !== this.token) return;
 
             const message = req.body.text;
             const trigger = req.body.trigger_word;
@@ -67,7 +68,7 @@ export default class Chat{
         })
     }
 
-    private setObject(message: msg.FirestoreMessage): Promise<void>{
-        return this.firestore.collection(this.MESSAGE).doc(this.channel).collection(this.MESSAGE).doc().set(message)
+    private setObject<T extends Serializable>(message: T): Promise<void> {
+        return this.firestore.collection(this.MESSAGE).doc(this.channel).collection(this.MESSAGE).doc().set(message.serialize())
     }
 }

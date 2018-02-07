@@ -1,7 +1,9 @@
 import * as moment from 'moment'
 import dateFormat from 'dateformat'
+import { Serializable } from './serializable'
+import { classToPlain } from "class-transformer";
 
-export class FirestoreMessage{
+export class FirestoreMessage implements Serializable {
     emailSender: string;
     idReceiver: string;
     idSender: string;
@@ -9,7 +11,7 @@ export class FirestoreMessage{
     text: string;
     timestamp: number;
 
-    constructor(channel: string, text: string){
+    constructor(channel: string, text: string) {
         this.emailSender = "kontakt@drively.pl";
         this.nameSender = "Drively";
         this.timestamp = moment().valueOf();
@@ -17,28 +19,44 @@ export class FirestoreMessage{
         this.idReceiver = channel;
         this.text = text;
     }
-}
 
-class SlackFields{
-    title: string;
-    value: string;
-    short: boolean;
-
-    constructor(author: string, date: Date){
-        this.short = false;
-        this.value = date.toLocaleString();
-        this.title = `Message from ${author}`;
+    public serialize(): any {
+        return classToPlain(this);
     }
 }
 
-export class SlackMessage{
+class SlackFields implements Serializable {
+    title: string;
+    short: boolean;
+    value: string;
+
+    constructor(author: string, date: Date) {
+        this.short = false;
+        this.title = `Message from [${author}]`;
+        this.value = 'Details';
+    }
+
+    public serialize(): any {
+        return classToPlain(this);
+    }
+}
+
+export class SlackMessage implements Serializable {
     text: string;
     color: string;
     fields: [SlackFields];
+    ts: string;
+    footer: string;
 
-    constructor(text: string, author: string, date: Date){
-        this.color = "#D00000";
+    constructor(text: string, author: string, date: Date) {
+        this.color = "#E40455";
         this.text = text;
         this.fields = [new SlackFields(author, date)];
+        this.ts = date.getMilliseconds().toString();
+        this.footer = "Drively Chat"
+    }
+
+    public serialize(): any {
+        return classToPlain(this);
     }
 }

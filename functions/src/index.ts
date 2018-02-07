@@ -7,9 +7,9 @@ import Chat from './chat/chat-notifier'
 import Channel from './chat/channel'
 
 const slackChannels = [
-        new Channel("General", "eMdEbXYPDF4PIWZTlcn9Vy96", "1", functions.config().slack.url_general),
-        new Channel("Team", "NG6EibtP7jTf327bInzBpuvA", "0", functions.config().slack.url_team)
-    ]
+    new Channel("General", "eMdEbXYPDF4PIWZTlcn9Vy96", "1", functions.config().slack.url_general),
+    new Channel("Team", "NG6EibtP7jTf327bInzBpuvA", "0", functions.config().slack.url_team)
+]
 
 export const createGroups = new CreateDefaultGroups().defaultGroup();
 export const startOnDocumentListenerGeneral = new Chat(slackChannels[0]).startOnDocumentListener();

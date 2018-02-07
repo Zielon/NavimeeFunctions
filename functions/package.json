@@ -2,6 +2,7 @@
   "name": "dirvely-functions",
   "description": "",
   "dependencies": {
+    "class-transformer": "^0.1.9",
     "cors": "^2.8.1",
     "dateformat": "3.0.2",
     "firebase-admin": "^5.8.1",
