@@ -4,7 +4,7 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 
 export default class CreateDefaultGroups {
-    firestore: any;
+    private firestore: any;
 
     constructor() {
         if (admin.apps.length === 0)

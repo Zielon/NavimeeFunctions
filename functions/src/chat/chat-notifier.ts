@@ -7,7 +7,7 @@ import Channel from './channel'
 
 // Sends messages to the Slack comunicator.
 class Slack{
-    url: string;
+    private url: string;
 
     constructor(url: string){
         this.url = url;
@@ -25,10 +25,10 @@ class Slack{
 
 // Starts listeners for endpoints and documents creations.
 export default class Chat{
-    firestore: any;
-    channel: string;
-    slack: Slack;
-    token: string;
+    private firestore: any;
+    private channel: string;
+    private slack: Slack;
+    private token: string;
 
     private readonly MESSAGE = "MESSAGES";
     private readonly ACCOUNT_ID = "ADMIN_DRIVELY";
@@ -50,9 +50,7 @@ export default class Chat{
                 const message = event.data.data();
                 if(message.idSender === this.ACCOUNT_ID) return;
                 const firestoreMessage = new msg.SlackMessage(message.text, message.nameSender, new Date(message.timestamp))
-                this.slack.send(firestoreMessage)
-                    .then(() => { console.log(firestoreMessage.text + " | WAS SENT SUCCESSFULLY!")})
-                    .catch(() => { console.log(firestoreMessage.text + " | WAS NOT SENT!")});
+                this.slack.send(firestoreMessage);
             });
     }
 

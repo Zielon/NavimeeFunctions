@@ -61,6 +61,5 @@ typings/
 .env
 
 node_modules/**
-package-lock.*
-package-lock.json
 .firebaserc
+google-services.json
