@@ -62,4 +62,4 @@ typings/
 
 node_modules/**
 .firebaserc
-google-services.json
+src/test/*.json
