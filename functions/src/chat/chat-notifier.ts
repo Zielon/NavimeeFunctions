@@ -14,11 +14,15 @@ class Slack {
         this.url = url;
     }
 
-    send(message: msg.SlackMessage): Promise<any> {
+    send<T extends Serializable>(message: T): Promise<any> {
         return rp({
             method: 'POST',
             uri: this.url,
-            body: message,
+            body: {
+                attachments: [
+                    message.serialize()
+                ]
+            },
             json: true
         })
     }
@@ -50,7 +54,7 @@ export default class Chat {
             .onCreate(event => {
                 const message = event.data.data();
                 if (message.idSender === this.ACCOUNT_ID) return;
-                const firestoreMessage = new msg.SlackMessage(message.text, message.nameSender, new Date(message.timestamp))
+                const firestoreMessage = new msg.SlackMessage(message.text, message.nameSender, Number(message.timestamp))
                 this.slack.send(firestoreMessage);
             });
     }

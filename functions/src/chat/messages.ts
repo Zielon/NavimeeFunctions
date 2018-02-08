@@ -1,7 +1,9 @@
 import * as moment from 'moment'
 import dateFormat from 'dateformat'
+import * as admin from 'firebase-admin'
+
 import { Serializable } from './serializable'
-import { classToPlain } from "class-transformer";
+import { classToPlain, Expose } from "class-transformer";
 
 export class FirestoreMessage implements Serializable {
     emailSender: string;
@@ -30,10 +32,10 @@ class SlackFields implements Serializable {
     short: boolean;
     value: string;
 
-    constructor(author: string, date: Date) {
+    constructor() {
         this.short = false;
-        this.title = `Message from [${author}]`;
-        this.value = 'Details';
+        this.title = 'Application';
+        this.value = process.env.GCLOUD_PROJECT;
     }
 
     public serialize(): any {
@@ -45,15 +47,19 @@ export class SlackMessage implements Serializable {
     text: string;
     color: string;
     fields: [SlackFields];
-    ts: string;
+    ts: number;
     footer: string;
 
-    constructor(text: string, author: string, date: Date) {
+    @Expose({ name: "author_name" })
+    author: string;
+
+    constructor(text: string, author: string, date: number) {
         this.color = "#E40455";
         this.text = text;
-        this.fields = [new SlackFields(author, date)];
-        this.ts = date.getMilliseconds().toString();
-        this.footer = "Drively Chat"
+        this.fields = [new SlackFields()];
+        this.ts = date;
+        this.footer = "Drively Chat";
+        this.author = `Author: ${author}`;
     }
 
     public serialize(): any {
