@@ -1,44 +1,24 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
-import * as rp from 'request-promise'
 
-import * as msg from './messages'
-import Channel from './channel'
-import { Serializable } from "./serializable";
-
-// Sends messages to the Slack comunicator.
-class Slack {
-    private url: string;
-
-    constructor(url: string) {
-        this.url = url;
-    }
-
-    send<T extends Serializable>(message: T): Promise<any> {
-        return rp({
-            method: 'POST',
-            uri: this.url,
-            body: {
-                attachments: [
-                    message.serialize()
-                ]
-            },
-            json: true
-        })
-    }
-}
+import Slack from './slack'
+import FirestoreMessage from '../models/firebase-message'
+import SlackMessage from '../models/slack-message'
+import SlackChannel from '../models/slack-channel'
+import { Serializable } from "../contracts/serializable";
+import FirestorePaths from "../consts/firestore-paths";
 
 // Starts listeners for endpoints and documents creations.
-export default class Chat {
+export default class ChatSlack {
     private firestore: any;
     private channel: string;
     private slack: Slack;
     private token: string;
 
-    private readonly MESSAGE = "MESSAGES";
+    private readonly MESSAGE = FirestorePaths.messages;
     private readonly ACCOUNT_ID = "ADMIN_DRIVELY";
 
-    constructor(channel: Channel) {
+    constructor(channel: SlackChannel) {
         if (admin.apps.length === 0)
             admin.initializeApp(functions.config().firebase);
 
@@ -54,7 +34,7 @@ export default class Chat {
             .onCreate(event => {
                 const message = event.data.data();
                 if (message.idSender === this.ACCOUNT_ID) return;
-                const firestoreMessage = new msg.SlackMessage(message.text, message.nameSender, Number(message.timestamp))
+                const firestoreMessage = new SlackMessage(message.text, message.nameSender, Number(message.timestamp))
                 this.slack.send(firestoreMessage);
             });
     }
@@ -66,7 +46,7 @@ export default class Chat {
 
             const message = req.body.text;
             const trigger = req.body.trigger_word;
-            this.setObject(new msg.FirestoreMessage(this.channel, message.split(trigger)[1].trim()))
+            this.setObject(new FirestoreMessage(this.channel, message.split(trigger)[1].trim()))
                 .then(() => { res.sendStatus(200); })
                 .catch(() => { res.sendStatus(500); });
         })

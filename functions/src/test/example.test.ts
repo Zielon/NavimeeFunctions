@@ -4,7 +4,7 @@ import * as functions from 'firebase-functions'
 
 import FirestoreBase from './firestore'
 import FirestorePaths from '../consts/firestore-paths'
-import Chat from '../chat/chat-notifier'
+import ChatSlack from '../chat/chat-slack'
 import Channel from '../chat/channel'
 
 describe('Firestore initialization tests', () => {

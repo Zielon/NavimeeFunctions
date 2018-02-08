@@ -1,4 +1,4 @@
-export default class Channel {
+export default class SlackChannel {
     token: string;
     channelId: string;
     url: string;

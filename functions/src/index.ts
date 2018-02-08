@@ -3,16 +3,24 @@
 import * as functions from 'firebase-functions'
 
 import CreateDefaultGroups from './chat/default-groups'
-import Chat from './chat/chat-notifier'
-import Channel from './chat/channel'
+import ChatSlack from './chat/chat-slack'
+import SlackChannel from './models/slack-channel'
+import ChatFcm from "./chat/chat-fcm";
 
 const slackChannels = [
-    new Channel("General", "eMdEbXYPDF4PIWZTlcn9Vy96", "1", functions.config().slack.url_general),
-    new Channel("Team", "NG6EibtP7jTf327bInzBpuvA", "0", functions.config().slack.url_team)
+    new SlackChannel("General", "eMdEbXYPDF4PIWZTlcn9Vy96", "1", functions.config().slack.url_general),
+    new SlackChannel("Team", "NG6EibtP7jTf327bInzBpuvA", "0", functions.config().slack.url_team)
 ]
 
+// DEFAULT
 export const createGroups = new CreateDefaultGroups().defaultGroup();
-export const startOnDocumentListenerGeneral = new Chat(slackChannels[0]).startOnDocumentListener();
-export const startOnRequestListenerGeneral = new Chat(slackChannels[0]).startOnRequestListener();
-export const startOnDocumentListenerTeam = new Chat(slackChannels[1]).startOnDocumentListener();
-export const startOnRequestListenerTeam = new Chat(slackChannels[1]).startOnRequestListener();
+
+// SLACK
+export const startOnDocumentListenerGeneral = new ChatSlack(slackChannels[0]).startOnDocumentListener();
+export const startOnRequestListenerGeneral = new ChatSlack(slackChannels[0]).startOnRequestListener();
+export const startOnDocumentListenerTeam = new ChatSlack(slackChannels[1]).startOnDocumentListener();
+export const startOnRequestListenerTeam = new ChatSlack(slackChannels[1]).startOnRequestListener();
+
+// FCM
+export const startOnPrivateChat = new ChatFcm().startOnPrivateChat();
+export const startOnGroupChat = new ChatFcm().startOnGroupChat();
