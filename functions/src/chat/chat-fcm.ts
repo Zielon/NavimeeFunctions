@@ -25,7 +25,7 @@ export default class ChatFcm {
                 const message = event.data.data();
                 const payload = {
                     notification: {
-                        title: 'Test',
+                        title: `${message.nameSender} sends you a message!`,
                         body: message.text,
                     }
                 };
@@ -34,12 +34,14 @@ export default class ChatFcm {
                     .doc(roomId)
                     .collection(FirestorePaths.members).get()
                     .then(snapshot => {
-                        snapshot.forEach((doc) => {
-                            this.firestore.collection(FirestorePaths.users).doc(doc.id).get()
-                                .then(user => {
-                                    if (user.data().token)
-                                        this.fcm.sendToSingle(payload, user.data().token);
-                                })
+                        snapshot.forEach(member => {
+                            this.firestore.collection(FirestorePaths.users).doc(member.id).get()
+                                .then(document => {
+                                    if (!document.exists) return;
+                                    let user = document.data();
+                                    if (user.token && user.id !== message.idSender)
+                                        this.fcm.sendToSingle(payload, user.token, document);
+                                });
                         });
                     })
             });
@@ -54,15 +56,17 @@ export default class ChatFcm {
                 const message = event.data.data();
                 const payload = {
                     notification: {
-                        title: 'Test',
+                        title: `${message.nameSender} sends you a message!`,
                         body: message.text,
                     }
                 };
 
                 this.firestore.collection(FirestorePaths.users).doc(message.idReceiver).get()
-                    .then(user => {
-                        if (user.data().token)
-                            this.fcm.sendToSingle(payload, user.data().token);
+                    .then(document => {
+                        if (!document.exists) return;
+                        let user = document.data();
+                        if (user.token)
+                            this.fcm.sendToSingle(payload, user.token, document);
                     })
             });
     }
