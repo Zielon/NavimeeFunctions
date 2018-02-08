@@ -60,6 +60,6 @@ typings/
 # dotenv environment variables file
 .env
 
-node_modules/**
+functions/node_modules/**
 .firebaserc
-src/test/*.json
+functions/src/test/**/*.json
