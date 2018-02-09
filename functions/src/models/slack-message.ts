@@ -12,12 +12,12 @@ export default class SlackMessage implements ISerializable {
     @Expose({ name: "author_name" })
     author: string;
 
-    constructor(text: string, author: string, date: number) {
+    constructor(text: string, author: string, date: number, documentId: string) {
         this.color = "#E40455";
         this.text = text;
         this.fields = [new SlackFields()];
         this.ts = date;
-        this.footer = "Drively Chat";
+        this.footer = `Drively Chat [${documentId}]`;
         this.author = `Author: ${author}`;
     }
 

@@ -6,8 +6,8 @@ import { IChatNotifier } from "./contracts/chat-notifier";
 import { ISlackSender } from "./contracts/slack-sender";
 
 import FcmSender from './services/fcm-sender'
+import SlackSender from "./services/slack-sender";
 import ChatNotifier from './chat/chat-notifier'
-import SlackSender from "./chat/slack-sender";
 
 let container = new Container();
 

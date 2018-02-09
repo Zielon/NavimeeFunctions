@@ -1,3 +1,5 @@
+// Types for the composition root.
+
 let TYPES = {
     IFcmSender: Symbol("IFcmSender"),
     IChatNotifier: Symbol("IChatNotifier"),

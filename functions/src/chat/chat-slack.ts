@@ -35,7 +35,7 @@ export default class ChatSlack {
             .onCreate(event => {
                 const message = event.data.data();
                 if (message.idSender === this.ACCOUNT_ID) return;
-                const firestoreMessage = new SlackMessage(message.text, message.nameSender, Number(message.timestamp))
+                const firestoreMessage = new SlackMessage(message.text, message.nameSender, Number(message.timestamp), event.params.messageId)
                 this.slack.send(firestoreMessage);
             });
     }
