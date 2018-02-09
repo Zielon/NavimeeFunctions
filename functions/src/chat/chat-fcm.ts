@@ -30,17 +30,18 @@ export default class ChatFcm {
                     }
                 };
 
-                this.firestore.collection(FirestorePaths.group)
+                return this.firestore.collection(FirestorePaths.group)
                     .doc(roomId)
                     .collection(FirestorePaths.members).get()
                     .then(snapshot => {
                         snapshot.forEach(member => {
-                            this.firestore.collection(FirestorePaths.users).doc(member.id).get()
+                            let reference = this.firestore.collection(FirestorePaths.users).doc(member.id);
+                            return reference.get()
                                 .then(document => {
                                     if (!document.exists) return;
                                     let user = document.data();
-                                    if (user.token && user.id !== message.idSender)
-                                        this.fcm.sendToSingle(payload, user.token, document);
+                                    if (user.token && user.token.length > 0 && user.id !== message.idSender)
+                                        this.fcm.sendToSingle(payload, user.token, reference);
                                 });
                         });
                     })
@@ -61,12 +62,13 @@ export default class ChatFcm {
                     }
                 };
 
-                this.firestore.collection(FirestorePaths.users).doc(message.idReceiver).get()
+                let reference = this.firestore.collection(FirestorePaths.users).doc(message.idReceiver);
+                return reference.get()
                     .then(document => {
                         if (!document.exists) return;
                         let user = document.data();
-                        if (user.token)
-                            this.fcm.sendToSingle(payload, user.token, document);
+                        if (user.token && user.token.length > 0)
+                            this.fcm.sendToSingle(payload, user.token, reference);
                     })
             });
     }

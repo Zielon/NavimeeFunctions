@@ -42,11 +42,11 @@ export default class ChatSlack {
     public startOnRequestListener(): any {
         return functions.https.onRequest((req, res) => {
             // Prevent recursive calls
-            if (req.body.token !== this.token) return;
+            if (req.body.token !== this.token) return Promise.resolve();
 
             const message = req.body.text;
             const trigger = req.body.trigger_word;
-            this.setObject(new FirestoreMessage(this.channel, message.split(trigger)[1].trim()))
+            return this.setObject(new FirestoreMessage(this.channel, message.split(trigger)[1].trim()))
                 .then(() => { res.sendStatus(200); })
                 .catch(() => { res.sendStatus(500); });
         })

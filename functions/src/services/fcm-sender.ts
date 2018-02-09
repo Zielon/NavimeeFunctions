@@ -7,18 +7,12 @@ export default class FcmSender implements NotificationSender {
 
     public sendToSingle(payload: admin.messaging.MessagingPayload, token: string, document: DocumentReference): Promise<any> {
         return admin.messaging().sendToDevice(token, payload).then(response => {
-            const tokensToRemove = [];
             if (response.failureCount > 0)
                 response.results.forEach((result, index) => {
                     const error = result.error;
-                    if (error) {
-                        tokensToRemove.push(document.update({ token: FieldValue.delete() }));
-                    }
+                    if (error)
+                        document.update({ token: FieldValue.delete() });
                 });
-
-            console.log("Tokens to remove count: " + tokensToRemove.length)
-            
-            return Promise.all(tokensToRemove);
         });
     };
 
