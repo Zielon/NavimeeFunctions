@@ -31,7 +31,7 @@ export default class ChatNotifier implements IChatNotifier {
                 const roomId = event.params.roomId;
                 const messageId = event.params.messageId;
                 const message = event.data.data();
-                const payload = new FcmPayload(message.text, this.MESSAGE_GROUP, message.idSender);
+                const payload = new FcmPayload(message.text, this.MESSAGE_GROUP, message.idSender, message.nameSender);
 
                 return this.firestore.collection(FirestorePaths.group)
                     .doc(roomId)
@@ -58,7 +58,7 @@ export default class ChatNotifier implements IChatNotifier {
                 const roomId = event.params.roomId;
                 const messageId = event.params.messageId;
                 const message = event.data.data();
-                const payload = new FcmPayload(message.text, this.MESSAGE_PRIVATE, message.idSender);
+                const payload = new FcmPayload(message.text, this.MESSAGE_PRIVATE, message.idSender, message.nameSender);
 
                 let reference = this.firestore.collection(FirestorePaths.users).doc(message.idReceiver);
                 return reference.get()
