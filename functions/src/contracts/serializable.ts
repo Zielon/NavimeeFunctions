@@ -1,3 +1,3 @@
-export interface Serializable {
+export interface ISerializable {
     serialize: () => any;
 }

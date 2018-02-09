@@ -1,8 +1,8 @@
 import * as moment from 'moment'
-import { classToPlain, Expose } from "class-transformer";
-import { Serializable } from '../contracts/serializable';
+import { classToPlain } from "class-transformer";
+import { ISerializable } from '../contracts/serializable';
 
-export default class FirestoreMessage implements Serializable {
+export default class FirestoreMessage implements ISerializable {
     emailSender: string;
     idReceiver: string;
     idSender: string;

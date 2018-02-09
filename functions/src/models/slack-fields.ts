@@ -1,7 +1,7 @@
-import { classToPlain, Expose } from "class-transformer";
-import { Serializable } from '../contracts/serializable';
+import { classToPlain } from "class-transformer";
+import { ISerializable } from '../contracts/serializable';
 
-export default class SlackFields implements Serializable {
+export default class SlackFields implements ISerializable {
     title: string;
     short: boolean;
     value: string;

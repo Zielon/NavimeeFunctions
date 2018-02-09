@@ -1,8 +1,8 @@
 import { classToPlain, Expose } from "class-transformer";
-import { Serializable } from '../contracts/serializable';
+import { ISerializable } from '../contracts/serializable';
 import SlackFields from './slack-fields';
 
-export default class SlackMessage implements Serializable {
+export default class SlackMessage implements ISerializable {
     text: string;
     color: string;
     fields: [SlackFields];

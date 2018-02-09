@@ -1,19 +1,27 @@
+import "reflect-metadata";
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
+import { injectable, inject } from "inversify";
 
-import FcmSender from '../services/fcm-sender'
+import TYPES from "../types";
 import FirestorePaths from '../consts/firestore-paths'
+import { IChatNotifier } from "../contracts/chat-notifier";
+import { IFcmSender } from "../contracts/fcm-sender";
+import FcmPayload from "../models/fcm-payload";
 
-export default class ChatFcm {
+@injectable()
+export default class ChatNotifier implements IChatNotifier {
+    @inject(TYPES.IFcmSender) private fcm: IFcmSender;
     private firestore: any;
-    private fcm: FcmSender;
+
+    private readonly MESSAGE_PRIVATE = "MESSAGE_PRIVATE";
+    private readonly MESSAGE_GROUP = "MESSAGE_GROUP";
 
     constructor() {
         if (admin.apps.length === 0)
             admin.initializeApp(functions.config().firebase);
 
         this.firestore = admin.firestore();
-        this.fcm = new FcmSender();
     }
 
     public startOnGroupChat(): any {
@@ -23,12 +31,7 @@ export default class ChatFcm {
                 const roomId = event.params.roomId;
                 const messageId = event.params.messageId;
                 const message = event.data.data();
-                const payload = {
-                    notification: {
-                        title: `${message.nameSender} sends you a message!`,
-                        body: message.text,
-                    }
-                };
+                const payload = new FcmPayload(message.text, this.MESSAGE_GROUP, message.idSender);
 
                 return this.firestore.collection(FirestorePaths.group)
                     .doc(roomId)
@@ -55,12 +58,7 @@ export default class ChatFcm {
                 const roomId = event.params.roomId;
                 const messageId = event.params.messageId;
                 const message = event.data.data();
-                const payload = {
-                    notification: {
-                        title: `${message.nameSender} sends you a message!`,
-                        body: message.text,
-                    }
-                };
+                const payload = new FcmPayload(message.text, this.MESSAGE_PRIVATE, message.idSender);
 
                 let reference = this.firestore.collection(FirestorePaths.users).doc(message.idReceiver);
                 return reference.get()

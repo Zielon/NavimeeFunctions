@@ -1,18 +1,20 @@
+import "reflect-metadata";
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
+import { inject } from "inversify";
 
-import Slack from './slack'
+import TYPES from "../types";
 import FirestoreMessage from '../models/firebase-message'
 import SlackMessage from '../models/slack-message'
 import SlackChannel from '../models/slack-channel'
-import { Serializable } from "../contracts/serializable";
+import { ISerializable } from "../contracts/serializable";
 import FirestorePaths from "../consts/firestore-paths";
+import { ISlackSender } from "../contracts/slack-sender";
 
-// Starts listeners for endpoints and documents creations.
 export default class ChatSlack {
     private firestore: any;
     private channel: string;
-    private slack: Slack;
+    @inject(TYPES.ISlackSender) private slack: ISlackSender;
     private token: string;
 
     private readonly MESSAGE = FirestorePaths.messages;
@@ -25,7 +27,6 @@ export default class ChatSlack {
         this.firestore = admin.firestore();
         this.channel = channel.channelId;
         this.token = channel.token;
-        this.slack = new Slack(channel.url);
     }
 
     public startOnDocumentListener(): any {
@@ -52,7 +53,7 @@ export default class ChatSlack {
         })
     }
 
-    private setObject<T extends Serializable>(message: T): Promise<void> {
+    private setObject<T extends ISerializable>(message: T): Promise<void> {
         return this.firestore.collection(this.MESSAGE).doc(this.channel).collection(this.MESSAGE).doc().set(message.serialize())
     }
 }

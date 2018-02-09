@@ -2,10 +2,13 @@
 
 import * as functions from 'firebase-functions'
 
+import TYPES from "./types";
 import CreateDefaultGroups from './chat/default-groups'
 import ChatSlack from './chat/chat-slack'
 import SlackChannel from './models/slack-channel'
-import ChatFcm from "./chat/chat-fcm";
+import ChatNotifier from "./chat/chat-notifier";
+import container from "./composition-root";
+import { IChatNotifier } from "./contracts/chat-notifier";
 
 const slackChannels = [
     new SlackChannel("General", "eMdEbXYPDF4PIWZTlcn9Vy96", "1", functions.config().slack.url_general),
@@ -22,5 +25,7 @@ export const startOnDocumentListenerTeam = new ChatSlack(slackChannels[1]).start
 export const startOnRequestListenerTeam = new ChatSlack(slackChannels[1]).startOnRequestListener();
 
 // FCM
-export const startOnPrivateChat = new ChatFcm().startOnPrivateChat();
-export const startOnGroupChat = new ChatFcm().startOnGroupChat();
+var chatNotifier = container.get<IChatNotifier>(TYPES.IChatNotifier);
+
+export const startOnPrivateChat = chatNotifier.startOnPrivateChat();
+export const startOnGroupChat = chatNotifier.startOnGroupChat();

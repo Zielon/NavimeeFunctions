@@ -1,11 +1,16 @@
+import "reflect-metadata";
 import * as admin from 'firebase-admin'
+import { injectable, inject } from "inversify";
+import TYPES from "../types";
 
-import { NotificationSender } from "../contracts/notification-sender";
+import { IFcmSender } from "../contracts/fcm-sender";
 import { FieldValue, DocumentReference } from "@google-cloud/firestore";
+import FcmPayload from "../models/fcm-payload";
 
-export default class FcmSender implements NotificationSender {
+@injectable()
+export default class FcmSender implements IFcmSender {
 
-    public sendToSingle(payload: admin.messaging.MessagingPayload, token: string, document: DocumentReference): Promise<any> {
+    public sendToSingle(payload: FcmPayload, token: string, document: DocumentReference): Promise<any> {
         return admin.messaging().sendToDevice(token, payload).then(response => {
             if (response.failureCount > 0)
                 response.results.forEach((result, index) => {
@@ -16,10 +21,7 @@ export default class FcmSender implements NotificationSender {
         });
     };
 
-    public sendToMany(payload: admin.messaging.MessagingPayload, tokens: string[]): Promise<any> {
+    public sendToMany(payload: FcmPayload, tokens: string[]): Promise<any> {
         throw Error("Not implemeneted");
-        //        return admin.messaging().sendToDevice(tokens, payload).then(response => {
-        //
-        //        });
     };
 }
