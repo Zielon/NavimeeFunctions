@@ -1,8 +1,9 @@
 // The entity form the collection MESSAGES
 
-import { Transform } from "class-transformer";
+import { Transform, classToPlain } from "class-transformer";
+import { ISerializable } from "../../contracts/serializable";
 
-export default class Message {
+export default class Message implements ISerializable {
     public emailSender: string;
     public idReceiver: string;
     public idSender: string;
@@ -12,4 +13,8 @@ export default class Message {
 
     @Transform(value => value.toString())
     public timestamp: number;
+
+    public serialize(): any {
+        return classToPlain(this);
+    }
 }

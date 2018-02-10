@@ -1,6 +1,9 @@
+import { ISerializable } from "../../contracts/serializable";
+import { classToPlain } from "class-transformer";
+
 // The entity form the collection USERS
 
-export default class User {
+export default class User implements ISerializable{
     public avatar: string;
     public defaultAvatar: boolean;
     public email: string;
@@ -14,4 +17,8 @@ export default class User {
     public dayScheduleNotification: boolean;
     public chatPrivateNotification: boolean;
     public chatGroupNotification: boolean;
+
+    public serialize(): any {
+        return classToPlain(this);
+    }
 }
