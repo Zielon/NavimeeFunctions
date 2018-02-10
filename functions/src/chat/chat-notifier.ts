@@ -2,12 +2,15 @@ import "reflect-metadata";
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import { injectable, inject } from "inversify";
+import { plainToClass } from "class-transformer";
 
 import TYPES from "../types";
 import FirestorePaths from '../consts/firestore-paths'
 import { IChatNotifier } from "../contracts/chat-notifier";
 import { IFcmSender } from "../contracts/fcm-sender";
 import FcmPayload from "../models/fcm-payload";
+import Message from "../models/entities/message";
+import User from "../models/entities/user";
 
 @injectable()
 export default class ChatNotifier implements IChatNotifier {
@@ -27,22 +30,26 @@ export default class ChatNotifier implements IChatNotifier {
     public startOnGroupChat(): any {
         return functions.firestore
             .document(`${FirestorePaths.messagesGroups}/{roomId}/${FirestorePaths.messages}/{messageId}`)
-            .onWrite(event => {
+            .onCreate(event => {
                 const roomId = event.params.roomId;
                 const messageId = event.params.messageId;
-                const message = event.data.data();
-                const payload = new FcmPayload(message.text, this.MESSAGE_GROUP, message.idSender, message.nameSender);
+                const message = plainToClass(Message, event.data.data() as Object)
+                const payload = new FcmPayload(message);
 
                 return this.firestore.collection(FirestorePaths.group)
                     .doc(roomId)
                     .collection(FirestorePaths.members).get()
                     .then(snapshot => {
                         snapshot.forEach(member => {
-                            let reference = this.firestore.collection(FirestorePaths.users).doc(member.id);
+                            const reference = this.firestore.collection(FirestorePaths.users).doc(member.id);
                             return reference.get()
                                 .then(document => {
                                     if (!document.exists) return;
-                                    let user = document.data();
+                                    const user = plainToClass(User, document.data() as Object);
+                                    
+                                    payload.setAvatar(user.avatar)
+                                    payload.setType(this.MESSAGE_GROUP)
+
                                     if (user.token && user.token.length > 0 && user.id !== message.idSender)
                                         this.fcm.sendToSingle(payload, user.token, reference);
                                 });
@@ -53,21 +60,25 @@ export default class ChatNotifier implements IChatNotifier {
 
     public startOnPrivateChat(): any {
         return functions.firestore
-            .document(`${FirestorePaths.messages}/{roomId}/${FirestorePaths.messages}/{messageId}`)
-            .onWrite(event => {
+            .document(`${FirestorePaths.messagesPrivate}/{roomId}/${FirestorePaths.messages}/{messageId}`)
+            .onCreate(event => {
                 const roomId = event.params.roomId;
                 const messageId = event.params.messageId;
-                const message = event.data.data();
-                const payload = new FcmPayload(message.text, this.MESSAGE_PRIVATE, message.idSender, message.nameSender);
+                const message = plainToClass(Message, event.data.data() as Object)
+                const payload = new FcmPayload(message);
 
-                let reference = this.firestore.collection(FirestorePaths.users).doc(message.idReceiver);
+                const reference = this.firestore.collection(FirestorePaths.users).doc(message.idReceiver);
                 return reference.get()
                     .then(document => {
                         if (!document.exists) return;
-                        let user = document.data();
+                        const user = plainToClass(User, document.data() as Object);
+
+                        payload.setAvatar(user.avatar)
+                        payload.setType(this.MESSAGE_PRIVATE)
+
                         if (user.token && user.token.length > 0)
                             this.fcm.sendToSingle(payload, user.token, reference);
-                    })
+                    });
             });
     }
 }

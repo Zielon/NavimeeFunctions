@@ -25,7 +25,7 @@ export const startOnDocumentListenerTeam = new ChatSlack(slackChannels[1]).start
 export const startOnRequestListenerTeam = new ChatSlack(slackChannels[1]).startOnRequestListener();
 
 // FCM
-var chatNotifier = container.get<IChatNotifier>(TYPES.IChatNotifier);
+const chatNotifier = container.get<IChatNotifier>(TYPES.IChatNotifier);
 
 export const startOnPrivateChat = chatNotifier.startOnPrivateChat();
 export const startOnGroupChat = chatNotifier.startOnGroupChat();
