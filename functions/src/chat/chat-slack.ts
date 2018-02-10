@@ -50,7 +50,7 @@ export default class ChatSlack {
             return this.setObject(new FirestoreMessage(this.channel, message.split(trigger)[1].trim()))
                 .then(() => { res.sendStatus(200); })
                 .catch(() => { res.sendStatus(500); });
-        })
+        });
     }
 
     private setObject<T extends ISerializable>(message: T): Promise<void> {

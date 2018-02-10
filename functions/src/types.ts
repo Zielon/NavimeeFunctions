@@ -1,6 +1,6 @@
 // Types for the composition root.
 
-let TYPES = {
+const TYPES = {
     IFcmSender: Symbol("IFcmSender"),
     IChatNotifier: Symbol("IChatNotifier"),
     ISlackSender: Symbol("ISlackSender")

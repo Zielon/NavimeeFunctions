@@ -2,8 +2,6 @@
 
 export default class User {
     public avatar: string;
-    public bigEventsNotifications: boolean;
-    public dayScheduledNotification: boolean;
     public defaultAvatar: boolean;
     public email: string;
     public id: string;
@@ -11,4 +9,9 @@ export default class User {
     public name: string;
     public timestamp: number;
     public token: string;
+    // Settings
+    public bigEventsNotification: boolean;
+    public dayScheduleNotification: boolean;
+    public chatPrivateNotification: boolean;
+    public chatGroupNotification: boolean;
 }
