@@ -30,59 +30,50 @@ export default class ChatNotifier implements IChatNotifier {
     public startOnGroupChat(): any {
         return functions.firestore
             .document(`${FirestorePaths.messagesGroups}/{roomId}/${FirestorePaths.messages}/{messageId}`)
-            .onCreate(event => {
+            .onCreate(async event => {
                 const roomId = event.params.roomId;
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
 
-                return this.firestore.collection(FirestorePaths.group).doc(roomId)
-                    .collection(FirestorePaths.members).get()
-                    .then(members => {
-                        return this.firestore.collection(FirestorePaths.users).doc(message.idSender).get()
-                            .then(snederDocument => {
-                                const sender = plainToClass(User, snederDocument.data() as Object);
+                const members = await this.firestore.collection(FirestorePaths.group).doc(roomId).collection(FirestorePaths.members).get();
+                const snederDocument = await this.firestore.collection(FirestorePaths.users).doc(message.idSender).get();
+                const sender = plainToClass(User, snederDocument.data() as Object);
 
-                                members.forEach(member => {
-                                    const reference = this.firestore.collection(FirestorePaths.users).doc(member.id);
-                                    return reference.get()
-                                        .then(receiverDocument => {
-                                            if (!receiverDocument.exists) return;
-                                            const receiver = plainToClass(User, receiverDocument.data() as Object);
-                                            const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_GROUP });
+                members.forEach(async member => {
+                    const reference = this.firestore.collection(FirestorePaths.users).doc(member.id);
+                    const receiverDocument = await reference.get();
 
-                                            if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id)
-                                                this.fcm.sendToSingle(payload, receiver.token, reference);
-                                        });
-                                });
-                            });
-                    })
+                    if (!receiverDocument.exists) return;
+                    const receiver = plainToClass(User, receiverDocument.data() as Object);
+                    const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_GROUP });
+
+                    if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id)
+                        this.fcm.sendToSingle(payload, receiver.token, reference);
+                });
             });
     }
 
     public startOnPrivateChat(): any {
         return functions.firestore
             .document(`${FirestorePaths.messagesPrivate}/{roomId}/${FirestorePaths.messages}/{messageId}`)
-            .onCreate(event => {
+            .onCreate(async event => {
                 const roomId = event.params.roomId;
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
 
-                return this.firestore.collection(FirestorePaths.users).doc(message.idSender).get()
-                    .then(snederDocument => {
-                        const sender = plainToClass(User, snederDocument.data() as Object);
+                const snederDocument = await this.firestore.collection(FirestorePaths.users).doc(message.idSender).get();
+                const sender = plainToClass(User, snederDocument.data() as Object);
+                const reference = this.firestore.collection(FirestorePaths.users).doc(message.idReceiver);
+                const receiverDocument = await reference.get()
 
-                        const reference = this.firestore.collection(FirestorePaths.users).doc(message.idReceiver);
-                        return reference.get()
-                            .then(receiverDocument => {
-                                if (!receiverDocument.exists) return;
+                if (!receiverDocument.exists) return;
 
-                                const receiver = plainToClass(User, receiverDocument.data() as Object);
-                                const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_PRIVATE });
+                const receiver = plainToClass(User, receiverDocument.data() as Object);
+                const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_PRIVATE });
 
-                                if (receiver.token && receiver.token.length > 0)
-                                    this.fcm.sendToSingle(payload, receiver.token, reference);
-                            });
-                    });
+                if (receiver.token && receiver.token.length > 0)
+                    this.fcm.sendToSingle(payload, receiver.token, reference);
+
             });
     }
 }
