@@ -35,22 +35,26 @@ export default class ChatNotifier implements IChatNotifier {
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
 
-                return this.firestore.collection(FirestorePaths.group)
-                    .doc(roomId)
+                return this.firestore.collection(FirestorePaths.group).doc(roomId)
                     .collection(FirestorePaths.members).get()
-                    .then(snapshot => {
-                        snapshot.forEach(member => {
-                            const reference = this.firestore.collection(FirestorePaths.users).doc(member.id);
-                            return reference.get()
-                                .then(document => {
-                                    if (!document.exists) return;
-                                    const user = plainToClass(User, document.data() as Object);
-                                    const payload = new FcmPayload(message, { avatar: user.avatar, type: this.MESSAGE_GROUP });
+                    .then(members => {
+                        return this.firestore.collection(FirestorePaths.users).doc(message.idSender).get()
+                            .then(snederDocument => {
+                                const sender = plainToClass(User, snederDocument.data() as Object);
 
-                                    if (user.token && user.token.length > 0 && user.id !== message.idSender)
-                                        this.fcm.sendToSingle(payload, user.token, reference);
+                                members.forEach(member => {
+                                    const reference = this.firestore.collection(FirestorePaths.users).doc(member.id);
+                                    return reference.get()
+                                        .then(receiverDocument => {
+                                            if (!receiverDocument.exists) return;
+                                            const receiver = plainToClass(User, receiverDocument.data() as Object);
+                                            const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_GROUP });
+
+                                            if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id)
+                                                this.fcm.sendToSingle(payload, receiver.token, reference);
+                                        });
                                 });
-                        });
+                            });
                     })
             });
     }
@@ -63,15 +67,21 @@ export default class ChatNotifier implements IChatNotifier {
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
 
-                const reference = this.firestore.collection(FirestorePaths.users).doc(message.idReceiver);
-                return reference.get()
-                    .then(document => {
-                        if (!document.exists) return;
-                        const user = plainToClass(User, document.data() as Object);
-                        const payload = new FcmPayload(message, { avatar: user.avatar, type: this.MESSAGE_PRIVATE });
+                return this.firestore.collection(FirestorePaths.users).doc(message.idSender).get()
+                    .then(snederDocument => {
+                        const sender = plainToClass(User, snederDocument.data() as Object);
 
-                        if (user.token && user.token.length > 0)
-                            this.fcm.sendToSingle(payload, user.token, reference);
+                        const reference = this.firestore.collection(FirestorePaths.users).doc(message.idReceiver);
+                        return reference.get()
+                            .then(receiverDocument => {
+                                if (!receiverDocument.exists) return;
+
+                                const receiver = plainToClass(User, receiverDocument.data() as Object);
+                                const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_PRIVATE });
+
+                                if (receiver.token && receiver.token.length > 0)
+                                    this.fcm.sendToSingle(payload, receiver.token, reference);
+                            });
                     });
             });
     }
