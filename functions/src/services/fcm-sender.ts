@@ -3,13 +3,12 @@ import * as admin from 'firebase-admin'
 import { injectable, inject } from "inversify";
 import TYPES from "../types";
 
-import { IFcmSender } from "../contracts/fcm-sender";
+import { IFcmService } from "../contracts/services/fcm-sender";
 import { FieldValue, DocumentReference } from "@google-cloud/firestore";
-import FcmPayload from "../models/fcm-payload";
 import { ISerializable } from "../contracts/serializable";
 
 @injectable()
-export default class FcmSender implements IFcmSender {
+export default class FcmService implements IFcmService {
 
     public sendToSingle<T extends ISerializable>(payload: T, token: string, document: DocumentReference): Promise<any> {
         return admin.messaging().sendToDevice(token, payload.serialize()).then(response => {

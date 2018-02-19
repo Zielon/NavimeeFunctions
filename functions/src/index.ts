@@ -8,7 +8,7 @@ import ChatSlack from './chat/chat-slack'
 import SlackChannel from './models/slack-channel'
 import ChatNotifier from "./chat/chat-notifier";
 import container from "./composition-root";
-import { IChatNotifier } from "./contracts/chat-notifier";
+import { IChatNotifier } from "./contracts/services/chat-notifier";
 
 const slackChannels = [
     new SlackChannel("General", "eMdEbXYPDF4PIWZTlcn9Vy96", "1", functions.config().slack.url_general),

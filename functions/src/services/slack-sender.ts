@@ -3,10 +3,10 @@ import * as rp from 'request-promise'
 import { injectable } from "inversify";
 
 import { ISerializable } from "../contracts/serializable";
-import { ISlackSender } from "../contracts/slack-sender"
+import { ISlackService } from "../contracts/services/slack-sender"
 
 @injectable()
-export default class SlackSender implements ISlackSender {
+export default class SlackService implements ISlackService {
     private url: string;
 
     constructor(url: string) {

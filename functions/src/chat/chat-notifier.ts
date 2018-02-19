@@ -6,74 +6,65 @@ import { plainToClass } from "class-transformer";
 
 import TYPES from "../types";
 import FirestorePaths from '../consts/firestore-paths'
-import { IChatNotifier } from "../contracts/chat-notifier";
-import { IFcmSender } from "../contracts/fcm-sender";
+import { IChatNotifier } from "../contracts/services/chat-notifier";
+import { IFcmService } from "../contracts/services/fcm-sender";
 import FcmPayload from "../models/fcm-payload";
 import Message from "../models/entities/message";
 import User from "../models/entities/user";
+import IUsersRepository from "../contracts/repositories/users";
+import IFirestore from "../contracts/services/firestore-service";
+import IChatRepository from "../contracts/repositories/chat";
 
 @injectable()
 export default class ChatNotifier implements IChatNotifier {
-    @inject(TYPES.IFcmSender) private fcm: IFcmSender;
-    private firestore: any;
+    @inject(TYPES.IFcmService) private fcmService: IFcmService;
+    @inject(TYPES.IFirestore) private firestore: IFirestore;
+    @inject(TYPES.IUsersRepository) private usersRepository: IUsersRepository;
+    @inject(TYPES.IChatRepository) private chatRepository: IChatRepository;
 
-    private readonly MESSAGE_PRIVATE = "MESSAGE_PRIVATE";
-    private readonly MESSAGE_GROUP = "MESSAGE_GROUP";
-
-    constructor() {
-        if (admin.apps.length === 0)
-            admin.initializeApp(functions.config().firebase);
-
-        this.firestore = admin.firestore();
-    }
+    private readonly MESSAGE_PRIVATE_TYPE = "MESSAGE_PRIVATE";
+    private readonly MESSAGE_GROUP_TYPE = "MESSAGE_GROUP";
 
     public startOnGroupChat(): any {
         return functions.firestore
-            .document(`${FirestorePaths.messagesGroups}/{roomId}/${FirestorePaths.messages}/{messageId}`)
+            .document(`${FirestorePaths.messagesGroups}/{country}/{roomId}/{messageId}`)
             .onCreate(async event => {
                 const roomId = event.params.roomId;
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
 
-                const members = await this.firestore.collection(FirestorePaths.group).doc(roomId).collection(FirestorePaths.members).get();
-                const snederDocument = await this.firestore.collection(FirestorePaths.users).doc(message.idSender).get();
-                const sender = plainToClass(User, snederDocument.data() as Object);
+                const room = await this.chatRepository.getRoom(roomId);
+                const sender = await this.usersRepository.getUser(message.idSender);
 
-                members.forEach(async member => {
-                    const reference = this.firestore.collection(FirestorePaths.users).doc(member.id);
-                    const receiverDocument = await reference.get();
+                room.members.forEach(async member => {
+                    const reference = this.firestore.get().collection(FirestorePaths.users).doc(member.memberId);
 
-                    if (!receiverDocument.exists) return;
-                    const receiver = plainToClass(User, receiverDocument.data() as Object);
-                    const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_GROUP });
+                    const receiver = await this.usersRepository.getUser(message.idReceiver);
+                    const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_GROUP_TYPE });
 
                     if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id)
-                        this.fcm.sendToSingle(payload, receiver.token, reference);
+                        this.fcmService.sendToSingle(payload, receiver.token, reference);
                 });
             });
     }
 
     public startOnPrivateChat(): any {
         return functions.firestore
-            .document(`${FirestorePaths.messagesPrivate}/{roomId}/${FirestorePaths.messages}/{messageId}`)
+            .document(`${FirestorePaths.messagesPrivate}/{country}/{roomId}/{messageId}`)
             .onCreate(async event => {
                 const roomId = event.params.roomId;
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
 
-                const snederDocument = await this.firestore.collection(FirestorePaths.users).doc(message.idSender).get();
-                const sender = plainToClass(User, snederDocument.data() as Object);
-                const reference = this.firestore.collection(FirestorePaths.users).doc(message.idReceiver);
-                const receiverDocument = await reference.get()
+                const reference = this.firestore.get().collection(FirestorePaths.users).doc(message.idReceiver);
 
-                if (!receiverDocument.exists) return;
+                const sender = await this.usersRepository.getUser(message.idSender);
+                const receiver = await this.usersRepository.getUser(message.idReceiver);
 
-                const receiver = plainToClass(User, receiverDocument.data() as Object);
-                const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_PRIVATE });
+                const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_PRIVATE_TYPE });
 
                 if (receiver.token && receiver.token.length > 0)
-                    this.fcm.sendToSingle(payload, receiver.token, reference);
-
+                    this.fcmService.sendToSingle(payload, receiver.token, reference);
             });
     }
 }

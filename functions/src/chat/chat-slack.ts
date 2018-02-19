@@ -9,29 +9,25 @@ import SlackMessage from '../models/slack-message'
 import SlackChannel from '../models/slack-channel'
 import { ISerializable } from "../contracts/serializable";
 import FirestorePaths from "../consts/firestore-paths";
-import { ISlackSender } from "../contracts/slack-sender";
+import IFirestore from "../contracts/services/firestore-service";
+import { ISlackService } from "../contracts/services/slack-sender";
 
 export default class ChatSlack {
-    private firestore: any;
     private channel: string;
-    @inject(TYPES.ISlackSender) private slack: ISlackSender;
     private token: string;
+    @inject(TYPES.ISlackService) private slack: ISlackService;
+    @inject(TYPES.IFirestore) private firestore: IFirestore;
 
-    private readonly MESSAGE = FirestorePaths.messages;
     private readonly ACCOUNT_ID = "ADMIN_DRIVELY";
 
     constructor(channel: SlackChannel) {
-        if (admin.apps.length === 0)
-            admin.initializeApp(functions.config().firebase);
-
-        this.firestore = admin.firestore();
         this.channel = channel.channelId;
         this.token = channel.token;
     }
 
     public startOnDocumentListener(): any {
         return functions.firestore
-            .document(`${this.MESSAGE}/${this.channel}/${this.MESSAGE}/{messageId}`)
+            .document(`${FirestorePaths.messagesGroups}/{country}/${this.channel}/{messageId}`)
             .onCreate(event => {
                 const message = event.data.data();
                 if (message.idSender === this.ACCOUNT_ID) return;
@@ -54,6 +50,12 @@ export default class ChatSlack {
     }
 
     private setObject<T extends ISerializable>(message: T): Promise<void> {
-        return this.firestore.collection(this.MESSAGE).doc(this.channel).collection(this.MESSAGE).doc().set(message.serialize())
+        return this.firestore.get()
+        .collection(FirestorePaths.messagesGroups)
+        .doc(FirestorePaths.country)
+        .collection(this.channel)
+        .doc(FirestorePaths.roomDetails)
+        .collection(FirestorePaths.members)
+        .doc().set(message.serialize())
     }
 }

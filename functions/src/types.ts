@@ -1,9 +1,12 @@
 // Types for the composition root.
 
 const TYPES = {
-    IFcmSender: Symbol("IFcmSender"),
+    IFcmService: Symbol("IFcmService"),
     IChatNotifier: Symbol("IChatNotifier"),
-    ISlackSender: Symbol("ISlackSender")
+    ISlackService: Symbol("ISlackService"),
+    IUsersRepository: Symbol("IUsersRepository"),
+    IFirestore: Symbol("IFirestore"),
+    IChatRepository: Symbol("IChatRepository")
 }
 
 export default TYPES;
