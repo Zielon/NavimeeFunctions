@@ -17,7 +17,7 @@ export default class CreateDefaultGroups {
         return functions.firestore
             .document('USERS/{userId}')
             .onCreate(event => {
-                const id = event.params.userId;
+ /*               const id = event.params.userId;
                 const ref = this.firestore.collection('USERS').doc(id).collection('GROUP');
 
                 // Drively team
@@ -26,7 +26,7 @@ export default class CreateDefaultGroups {
 
                 // General
                 ref.doc().set({ roomId: '1' }).then(
-                    () => this.firestore.collection('GROUP').doc('1').collection('MEMBERS').doc(id).set({ memberId: id }));
+                    () => this.firestore.collection('GROUP').doc('1').collection('MEMBERS').doc(id).set({ memberId: id })); */
             });
     }
 }

@@ -19,7 +19,7 @@ export default class ChatRepository implements IChatRepository {
     public async getRoom(id: string): Promise<Room> {
         return new Promise<Room>(async (resolve, reject) => {
             const ref = this.firestore.get()
-                .collection(FirestorePaths.users)
+                .collection(FirestorePaths.group)
                 .doc(FirestorePaths.country)
                 .collection(id)
                 .doc(FirestorePaths.roomDetails);
@@ -28,9 +28,10 @@ export default class ChatRepository implements IChatRepository {
 
             if (!room.exists) reject();
 
-            const members = await ref.collection(FirestorePaths.members).get();
             const result = plainToClass(Room, room.data() as Object)
-            result.members = members.map(member => plainToClass(Member, member.data() as Object));
+            result.members = new Array<Member>();
+            const members = await ref.collection(FirestorePaths.members).get();
+            members.forEach(member => result.members.push(plainToClass(Member, member.data() as Object)));
 
             resolve(result);
         });

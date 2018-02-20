@@ -5,7 +5,6 @@ import { classToPlain } from "class-transformer";
 
 export default class User implements ISerializable{
     public avatar: string;
-    public defaultAvatar: boolean;
     public email: string;
     public id: string;
     public isOnline: boolean;
