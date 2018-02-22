@@ -55,11 +55,10 @@ export default class ChatNotifier implements IChatNotifier {
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
 
-                const room = await this.chatRepository.getRoom(roomId);
                 const reference = this.firestore.get().collection(FirestorePaths.users).doc(message.idReceiver);
                 const sender = await this.usersRepository.getUser(message.idSender);
                 const receiver = await this.usersRepository.getUser(message.idReceiver);
-                const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_PRIVATE_TYPE, roomName: room.name });
+                const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_PRIVATE_TYPE });
 
                 if (receiver.token && receiver.token.length > 0 && receiver.chatPrivateNotification)
                     this.fcmService.sendToSingle(payload, receiver.token, reference);
