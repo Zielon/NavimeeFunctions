@@ -39,9 +39,9 @@ export default class ChatNotifier implements IChatNotifier {
                 room.members.forEach(async member => {
                     const reference = this.firestore.get().collection(FirestorePaths.users).doc(member.memberId);
                     const receiver = await this.usersRepository.getUser(member.memberId);
-                    const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_GROUP_TYPE });
+                    const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_GROUP_TYPE, roomName: room.name});
 
-                    if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id)
+                    if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id && receiver.chatGroupNotification)
                         this.fcmService.sendToSingle(payload, receiver.token, reference);
                 });
             });
@@ -55,12 +55,13 @@ export default class ChatNotifier implements IChatNotifier {
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
 
+                const room = await this.chatRepository.getRoom(roomId);
                 const reference = this.firestore.get().collection(FirestorePaths.users).doc(message.idReceiver);
                 const sender = await this.usersRepository.getUser(message.idSender);
                 const receiver = await this.usersRepository.getUser(message.idReceiver);
-                const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_PRIVATE_TYPE });
+                const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_PRIVATE_TYPE, roomName: room.name });
 
-                if (receiver.token && receiver.token.length > 0)
+                if (receiver.token && receiver.token.length > 0 && receiver.chatPrivateNotification)
                     this.fcmService.sendToSingle(payload, receiver.token, reference);
             });
     }
