@@ -31,7 +31,7 @@ export default class ChatSlack {
             .onCreate(event => {
                 const message = event.data.data();
                 if (message.idSender === this.ACCOUNT_ID) return;
-                const firestoreMessage = new SlackMessage(message.text, message.nameSender, Number(message.timestamp), event.params.messageId)
+                const firestoreMessage = new SlackMessage(message.text, message.nameSender, event.params.messageId)
                 this.slack.send(firestoreMessage);
             });
     }
@@ -51,11 +51,11 @@ export default class ChatSlack {
 
     private setObject<T extends ISerializable>(message: T): Promise<void> {
         return this.firestore.get()
-        .collection(FirestorePaths.messagesGroups)
-        .doc(FirestorePaths.country)
-        .collection(this.channel)
-        .doc(FirestorePaths.roomDetails)
-        .collection(FirestorePaths.members)
-        .doc().set(message.serialize())
+                .collection(FirestorePaths.messagesGroups)
+                .doc(FirestorePaths.country)
+                .collection(this.channel)
+                .doc(FirestorePaths.roomDetails)
+                .collection(FirestorePaths.members)
+                .doc().set(message.serialize())
     }
 }

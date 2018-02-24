@@ -14,9 +14,7 @@ export default class FcmService implements IFcmService {
         return admin.messaging().sendToDevice(token, payload.serialize()).then(response => {
             if (response.failureCount > 0)
                 response.results.forEach((result, index) => {
-                    const error = result.error;
-                    if (error)
-                        document.update({ token: FieldValue.delete() });
+                    console.log(result.error);
                 });
         });
     };
