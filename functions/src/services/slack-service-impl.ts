@@ -3,7 +3,7 @@ import * as rp from 'request-promise'
 import { injectable } from "inversify";
 
 import { ISerializable } from "../contracts/serializable";
-import { ISlackService } from "../contracts/services/slack-sender"
+import { ISlackService } from "../contracts/services/slack-service"
 
 @injectable()
 export default class SlackService implements ISlackService {

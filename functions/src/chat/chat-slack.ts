@@ -10,7 +10,7 @@ import SlackChannel from '../models/slack-channel'
 import { ISerializable } from "../contracts/serializable";
 import FirestorePaths from "../consts/firestore-paths";
 import IFirestore from "../contracts/services/firestore-service";
-import { ISlackService } from "../contracts/services/slack-sender";
+import { ISlackService } from "../contracts/services/slack-service";
 
 export default class ChatSlack {
     private channel: string;

@@ -6,7 +6,8 @@ const TYPES = {
     ISlackService: Symbol("ISlackService"),
     IUsersRepository: Symbol("IUsersRepository"),
     IFirestore: Symbol("IFirestore"),
-    IChatRepository: Symbol("IChatRepository")
+    IChatRepository: Symbol("IChatRepository"),
+    ISystemEvents: Symbol("ISystemEvents")
 }
 
 export default TYPES;

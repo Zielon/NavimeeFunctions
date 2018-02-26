@@ -9,6 +9,8 @@ import SlackChannel from './models/slack-channel'
 import ChatNotifier from "./chat/chat-notifier";
 import container from "./composition-root";
 import { IChatNotifier } from "./contracts/services/chat-notifier";
+import SystemEvents from './services/system-events-impl';
+import ISystemEvents from './contracts/services/system-events';
 
 const slackChannels = [
     new SlackChannel("General", "eMdEbXYPDF4PIWZTlcn9Vy96", "1", functions.config().slack.url_general),
@@ -16,16 +18,21 @@ const slackChannels = [
 ]
 
 // DEFAULT
-export const createGroups = new CreateDefaultGroups().defaultGroup();
+export const onCreateGroupsListener = new CreateDefaultGroups().defaultGroup();
 
 // SLACK
-export const startOnDocumentListenerGeneral = new ChatSlack(slackChannels[0]).startOnDocumentListener();
-export const startOnRequestListenerGeneral = new ChatSlack(slackChannels[0]).startOnRequestListener();
-export const startOnDocumentListenerTeam = new ChatSlack(slackChannels[1]).startOnDocumentListener();
-export const startOnRequestListenerTeam = new ChatSlack(slackChannels[1]).startOnRequestListener();
+export const onGeneralChatListener = new ChatSlack(slackChannels[0]).startOnDocumentListener();
+export const onSlackGeneralListener = new ChatSlack(slackChannels[0]).startOnRequestListener();
+export const onTeamChatListener = new ChatSlack(slackChannels[1]).startOnDocumentListener();
+export const onSlackTeamListener = new ChatSlack(slackChannels[1]).startOnRequestListener();
 
 // FCM
 const chatNotifier = container.get<IChatNotifier>(TYPES.IChatNotifier);
 
-export const startOnPrivateChat = chatNotifier.startOnPrivateChat();
-export const startOnGroupChat = chatNotifier.startOnGroupChat();
+export const onPrivateChatListener = chatNotifier.startOnPrivateChat();
+export const onGroupChatListener = chatNotifier.startOnGroupChat();
+
+// SYSTEM EVENTS
+const systemEvents = container.get<ISystemEvents>(TYPES.ISystemEvents);
+
+export const onSystemFirstOpenListener = systemEvents.startOnFirstOpenEventListener();

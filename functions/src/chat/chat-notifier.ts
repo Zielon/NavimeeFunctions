@@ -7,13 +7,14 @@ import { plainToClass } from "class-transformer";
 import TYPES from "../types";
 import FirestorePaths from '../consts/firestore-paths'
 import { IChatNotifier } from "../contracts/services/chat-notifier";
-import { IFcmService } from "../contracts/services/fcm-sender";
+import { IFcmService } from "../contracts/services/fcm-service";
 import FcmPayload from "../models/fcm-payload";
 import Message from "../models/entities/message";
 import User from "../models/entities/user";
 import IUsersRepository from "../contracts/repositories/users";
 import IFirestore from "../contracts/services/firestore-service";
 import IChatRepository from "../contracts/repositories/chat";
+import FcmTypes from "../consts/fcm-types";
 
 @injectable()
 export default class ChatNotifier implements IChatNotifier {
@@ -21,9 +22,6 @@ export default class ChatNotifier implements IChatNotifier {
     @inject(TYPES.IFirestore) private firestore: IFirestore;
     @inject(TYPES.IUsersRepository) private usersRepository: IUsersRepository;
     @inject(TYPES.IChatRepository) private chatRepository: IChatRepository;
-
-    private readonly MESSAGE_PRIVATE_TYPE = "MESSAGE_PRIVATE";
-    private readonly MESSAGE_GROUP_TYPE = "MESSAGE_GROUP";
 
     public startOnGroupChat(): any {
         return functions.firestore
@@ -37,12 +35,11 @@ export default class ChatNotifier implements IChatNotifier {
                 const sender = await this.usersRepository.getUser(message.idSender);
 
                 room.members.forEach(async member => {
-                    const reference = this.firestore.get().collection(FirestorePaths.users).doc(member.memberId);
                     const receiver = await this.usersRepository.getUser(member.memberId);
-                    const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_GROUP_TYPE, roomName: room.name});
+                    const payload = new FcmPayload(message, { avatar: sender.avatar, type: FcmTypes.MESSAGE_GROUP_TYPE, roomName: room.name});
 
                     if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id && receiver.chatGroupNotification)
-                        this.fcmService.sendToSingle(payload, receiver.token, reference);
+                        this.fcmService.sendToSingle(payload, receiver.token);
                 });
             });
     }
@@ -55,13 +52,12 @@ export default class ChatNotifier implements IChatNotifier {
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
 
-                const reference = this.firestore.get().collection(FirestorePaths.users).doc(message.idReceiver);
                 const sender = await this.usersRepository.getUser(message.idSender);
                 const receiver = await this.usersRepository.getUser(message.idReceiver);
-                const payload = new FcmPayload(message, { avatar: sender.avatar, type: this.MESSAGE_PRIVATE_TYPE });
+                const payload = new FcmPayload(message, { avatar: sender.avatar, type: FcmTypes.MESSAGE_PRIVATE_TYPE });
 
                 if (receiver.token && receiver.token.length > 0 && receiver.chatPrivateNotification)
-                    this.fcmService.sendToSingle(payload, receiver.token, reference);
+                    this.fcmService.sendToSingle(payload, receiver.token);
             });
     }
 }
