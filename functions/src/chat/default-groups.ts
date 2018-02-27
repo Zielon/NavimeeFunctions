@@ -20,7 +20,7 @@ export default class CreateDefaultGroups {
     public defaultGroup(): any {
         return functions.firestore
             .document('USERS/{userId}')
-            .onUpdate(event => {
+            .onWrite(event => {
                 const id = event.params.userId;
                 const user = plainToClass(User, event.data.data() as Object)
 
@@ -30,14 +30,16 @@ export default class CreateDefaultGroups {
                 const ref = this.firestore.collection('USERS').doc(user.id).collection('GROUP');
 
                 ['DRIVELY', 'OGÓLNY', user.city].forEach(chat => {
-                    ref.doc().set({ roomId: chat }).then(
-                        () => this.firestore.collection(FirestorePaths.group)
+                    ref.doc(chat).set({ roomId: chat }).then(() =>
+                        this.firestore.collection(FirestorePaths.group)
                             .doc(user.country)
                             .collection(chat)
                             .doc(FirestorePaths.roomDetails)
                             .collection(FirestorePaths.members)
-                            .set(member));
+                            .doc(user.id).set(member.serialize()));
                 });
+
+                return null;
             });
     }
 }
