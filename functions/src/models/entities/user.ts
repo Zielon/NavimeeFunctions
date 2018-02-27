@@ -11,11 +11,15 @@ export default class User implements ISerializable{
     public name: string;
     public timestamp: number;
     public token: string;
+    public city: string;
+    public country: string;
+
     // Settings
     public bigEventsNotification: boolean;
     public dayScheduleNotification: boolean;
     public chatPrivateNotification: boolean;
     public chatGroupNotification: boolean;
+    public shareLocalization: boolean;
 
     public serialize(): any {
         return classToPlain(this);

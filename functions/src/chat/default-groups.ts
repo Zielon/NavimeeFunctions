@@ -2,6 +2,10 @@
 
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
+import User from '../models/entities/user';
+import { plainToClass } from 'class-transformer';
+import Member from '../models/entities/chat/member';
+import FirestorePaths from '../consts/firestore-paths';
 
 export default class CreateDefaultGroups {
     private firestore: any;
@@ -16,17 +20,24 @@ export default class CreateDefaultGroups {
     public defaultGroup(): any {
         return functions.firestore
             .document('USERS/{userId}')
-            .onCreate(event => {
- /*               const id = event.params.userId;
-                const ref = this.firestore.collection('USERS').doc(id).collection('GROUP');
+            .onUpdate(event => {
+                const id = event.params.userId;
+                const user = plainToClass(User, event.data.data() as Object)
 
-                // Drively team
-                ref.doc().set({ roomId: '0' }).then(
-                    () => this.firestore.collection('GROUP').doc('0').collection('MEMBERS').doc(id).set({ memberId: id }));
+                const member = new Member();
+                member.memberId = user.id;
 
-                // General
-                ref.doc().set({ roomId: '1' }).then(
-                    () => this.firestore.collection('GROUP').doc('1').collection('MEMBERS').doc(id).set({ memberId: id })); */
+                const ref = this.firestore.collection('USERS').doc(user.id).collection('GROUP');
+
+                ['DRIVELY', 'OGÓLNY', user.city].forEach(chat => {
+                    ref.doc().set({ roomId: chat }).then(
+                        () => this.firestore.collection(FirestorePaths.group)
+                            .doc(user.country)
+                            .collection(chat)
+                            .doc(FirestorePaths.roomDetails)
+                            .collection(FirestorePaths.members)
+                            .set(member));
+                });
             });
     }
 }
