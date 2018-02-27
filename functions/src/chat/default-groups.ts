@@ -26,6 +26,7 @@ export default class CreateDefaultGroups {
 
                 const member = new Member();
                 member.memberId = user.id;
+                member.notification = true;
 
                 const ref = this.firestore.collection('USERS').doc(user.id).collection('GROUP');
 

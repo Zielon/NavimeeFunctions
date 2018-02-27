@@ -27,11 +27,11 @@ export default class ChatNotifier implements IChatNotifier {
         return functions.firestore
             .document(`${FirestorePaths.messagesGroups}/{country}/{roomId}/{messageId}`)
             .onCreate(async event => {
-                const roomId = event.params.roomId;
+                const roomId = event.params.roomId as String;
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
 
-                const room = await this.chatRepository.getRoom(roomId);
+                const room = await this.chatRepository.getRoom(roomId.toUpperCase());
                 const sender = await this.usersRepository.getUser(message.idSender);
 
                 room.members.forEach(async member => {
