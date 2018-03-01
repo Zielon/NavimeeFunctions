@@ -3,13 +3,12 @@
 import * as functions from 'firebase-functions'
 
 import TYPES from "./types";
-import ChatSlack from './chat/chat-slack'
 import SlackChannel from './models/slack-channel'
-import ChatNotifier from "./chat/chat-notifier";
 import container from "./composition-root";
-import { IChatNotifier } from "./contracts/services/chat-notifier";
+import IChatNotifier from "./contracts/services/chat-notifier";
 import SystemEvents from './services/system-events-impl';
 import ISystemEvents from './contracts/services/system-events';
+import ISlackService from './contracts/services/slack-service';
 
 const slackChannels = [
     new SlackChannel("Ogólny", "eMdEbXYPDF4PIWZTlcn9Vy96", "OGOLNY", functions.config().slack.url_general),
@@ -17,11 +16,13 @@ const slackChannels = [
 ]
 
 // SLACK
-export const onGeneralChatListener = new ChatSlack(slackChannels[0]).startOnDocumentListener();
-export const onSlackGeneralListener = new ChatSlack(slackChannels[0]).startOnRequestListener();
+const slackService = container.get<ISlackService>(TYPES.ISlackService);
 
-export const onTeamChatListener = new ChatSlack(slackChannels[1]).startOnDocumentListener();
-export const onSlackTeamListener = new ChatSlack(slackChannels[1]).startOnRequestListener();
+export const onGeneralChatListener = slackService.startOnDocumentListener(slackChannels[0]);
+export const onSlackGeneralListener = slackService.startOnRequestListener(slackChannels[0]);
+
+export const onTeamChatListener = slackService.startOnDocumentListener(slackChannels[1]);
+export const onSlackTeamListener = slackService.startOnRequestListener(slackChannels[1]);
 
 // CHAT
 const chatNotifier = container.get<IChatNotifier>(TYPES.IChatNotifier);

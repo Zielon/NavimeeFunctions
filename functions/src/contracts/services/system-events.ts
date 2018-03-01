@@ -1,3 +1,3 @@
-export default interface ISystemEvents{
+export default interface ISystemEvents {
     startOnFirstOpenEventListener(): any;
 }

@@ -6,8 +6,8 @@ import { plainToClass } from "class-transformer";
 
 import TYPES from "../types";
 import FirestorePaths from '../consts/firestore-paths'
-import { IChatNotifier } from "../contracts/services/chat-notifier";
-import { IFcmService } from "../contracts/services/fcm-service";
+import IChatNotifier from "../contracts/services/chat-notifier";
+import IFcmService from "../contracts/services/fcm-service";
 import FcmPayload from "../models/fcm-payload";
 import Message from "../models/entities/message";
 import User from "../models/entities/user";

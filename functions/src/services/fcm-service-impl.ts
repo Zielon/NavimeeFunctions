@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin'
 import { injectable, inject } from "inversify";
 import TYPES from "../types";
 
-import { IFcmService } from "../contracts/services/fcm-service";
+import IFcmService from "../contracts/services/fcm-service";
 import { FieldValue, DocumentReference } from "@google-cloud/firestore";
 import { ISerializable } from "../contracts/serializable";
 

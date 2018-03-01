@@ -1,13 +1,13 @@
 import { Container } from "inversify";
 import TYPES from "./types";
 
-import { IFcmService } from "./contracts/services/fcm-service";
-import { IChatNotifier } from "./contracts/services/chat-notifier";
-import { ISlackService } from "./contracts/services/slack-service";
+import IFcmService from "./contracts/services/fcm-service";
+import IChatNotifier from "./contracts/services/chat-notifier";
+import ISlackService from "./contracts/services/slack-service";
 
 import FcmService from './services/fcm-service-impl'
 import SlackService from "./services/slack-service-impl";
-import ChatNotifier from './chat/chat-notifier'
+import ChatNotifier from './services/chat-notifier-impl'
 import IUsersRepository from "./contracts/repositories/users";
 import UsersRepository from "./repositories/user-repository";
 import IFirestore from "./contracts/services/firestore-service";
