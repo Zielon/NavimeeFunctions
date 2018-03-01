@@ -7,8 +7,9 @@ import * as functions from 'firebase-functions'
 @injectable()
 export default class FirestoreService implements IFirestore {
     get() : any {
-        if (admin.apps.length === 0)
-            admin.initializeApp(functions.config().firebase);
-        return admin.firestore();
+        if (admin.apps.length > 0)
+            return admin.firestore();
+            
+        admin.initializeApp(functions.config().firebase);
     }
 }

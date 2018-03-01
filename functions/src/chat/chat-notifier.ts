@@ -15,6 +15,7 @@ import IUsersRepository from "../contracts/repositories/users";
 import IFirestore from "../contracts/services/firestore-service";
 import IChatRepository from "../contracts/repositories/chat";
 import FcmTypes from "../consts/fcm-types";
+import Member from "../models/entities/chat/member";
 
 @injectable()
 export default class ChatNotifier implements IChatNotifier {
@@ -36,7 +37,7 @@ export default class ChatNotifier implements IChatNotifier {
 
                 room.members.forEach(async member => {
                     const receiver = await this.usersRepository.getUser(member.memberId);
-                    const payload = new FcmPayload(message, { avatar: sender.avatar, type: FcmTypes.MESSAGE_GROUP_TYPE, roomName: room.name});
+                    const payload = new FcmPayload(message, { avatar: sender.avatar, type: FcmTypes.MESSAGE_GROUP_TYPE, roomName: room.name });
 
                     if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id && receiver.chatGroupNotification)
                         this.fcmService.sendToSingle(payload, receiver.token);
@@ -58,6 +59,30 @@ export default class ChatNotifier implements IChatNotifier {
 
                 if (receiver.token && receiver.token.length > 0 && receiver.chatPrivateNotification)
                     this.fcmService.sendToSingle(payload, receiver.token);
+            });
+    }
+
+    public createDefaultGroups(): any {
+        return functions.firestore
+            .document('USERS/{userId}')
+            .onWrite(async event => {
+                const id = event.params.userId;
+                const user = plainToClass(User, event.data.data() as Object)
+
+                const defaults = ['DRIVELY', 'OGOLNY'];
+                const rooms = await this.chatRepository.getRooms();
+
+                const cityRoom = rooms.filter(room => room.name === user.city);
+
+                if (cityRoom.length > 0)
+                    defaults.push(cityRoom.shift().id)
+
+                defaults.forEach(roomId => {
+                    this.usersRepository.addRoom(user.id, roomId)
+                    this.chatRepository.addMember(roomId, user);
+                });
+
+                return null;
             });
     }
 }

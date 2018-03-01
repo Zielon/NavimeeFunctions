@@ -18,10 +18,18 @@ export default class UsersRepository implements IUsersRepository {
     public async getUser(id: string): Promise<User> {
         return new Promise<User>(async (resolve, reject) => {
             const user = await this.firestore.get().collection(FirestorePaths.users).doc(id).get();
-
             if (!user.exists) reject();
-
             resolve(plainToClass(User, user.data() as Object));
+        });
+    }
+
+    public async addRoom(userId: string, roomId: string): Promise<void> {
+        return new Promise<void>(async (resolve, reject) => {
+            return this.firestore.get()
+                .collection(FirestorePaths.users)
+                .doc(userId)
+                .collection(FirestorePaths.group)
+                .doc(roomId).set({ roomId: roomId });
         });
     }
 }

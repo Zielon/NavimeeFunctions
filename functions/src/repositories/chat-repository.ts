@@ -10,6 +10,7 @@ import IFirestore from "../contracts/services/firestore-service";
 import IChatRepository from "../contracts/repositories/chat";
 import Room from "../models/entities/chat/room";
 import Member from "../models/entities/chat/member";
+import User from "../models/entities/user";
 
 @injectable()
 export default class ChatRepository implements IChatRepository {
@@ -35,5 +36,38 @@ export default class ChatRepository implements IChatRepository {
 
             resolve(result);
         });
+    }
+
+    public async getRooms(): Promise<Array<Room>> {
+        return new Promise<Array<Room>>(async (resolve, reject) => {
+            const ref = this.firestore.get()
+                .collection(FirestorePaths.group)
+                .doc(FirestorePaths.country);
+
+            const rooms = await ref.getCollections();
+            const result = new Array<Room>();
+
+            rooms.forEach(async collection => {
+                const room = await ref.collection(collection.id).doc(FirestorePaths.roomDetails).get();
+                if (!room.exists) reject();
+                result.push(plainToClass(Room, room.data() as Object));
+            });
+
+            resolve(result);
+        });
+    }
+
+    public async addMember(roomId: string, user: User): Promise<void> {
+        const member = new Member();
+        member.memberId = user.id;
+        member.notification = true;
+
+        return this.firestore.get()
+            .collection(FirestorePaths.group)
+            .doc(user.country)
+            .collection(roomId)
+            .doc(FirestorePaths.roomDetails)
+            .collection(FirestorePaths.members)
+            .doc(user.id).set(member.serialize());
     }
 }

@@ -1,4 +1,5 @@
 export interface IChatNotifier{
     startOnGroupChat(): any;
-    startOnPrivateChat(): any
+    startOnPrivateChat(): any;
+    createDefaultGroups(): any;
 }
