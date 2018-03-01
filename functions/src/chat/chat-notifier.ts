@@ -28,12 +28,12 @@ export default class ChatNotifier implements IChatNotifier {
         return functions.firestore
             .document(`${FirestorePaths.messagesGroups}/{country}/{roomId}/{messageId}`)
             .onCreate(async event => {
-                const roomId = event.params.roomId as String;
+                const roomId = event.params.roomId as string;
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
 
-                const room = await this.chatRepository.getRoom(roomId.toUpperCase());
                 const sender = await this.usersRepository.getUser(message.idSender);
+                const room = await this.chatRepository.getRoom(roomId, sender);
 
                 room.members.forEach(async member => {
                     const receiver = await this.usersRepository.getUser(member.memberId);
@@ -70,12 +70,15 @@ export default class ChatNotifier implements IChatNotifier {
                 const user = plainToClass(User, event.data.data() as Object)
 
                 const defaults = ['DRIVELY', 'OGOLNY'];
-                const rooms = await this.chatRepository.getRooms();
+                const rooms = await this.chatRepository.getRooms(user);
+                const room = rooms.filter(r => r.name.toUpperCase() === user.city.toUpperCase());
 
-                const cityRoom = rooms.filter(room => room.name === user.city);
-
-                if (cityRoom.length > 0)
-                    defaults.push(cityRoom.shift().id)
+                // Each city has it's own channle to advertisements.
+                if (room.length > 0) {
+                    const roomId = room.shift().id.trim();
+                    defaults.push(roomId)
+                    defaults.push(roomId + '_OGLOSZENIA')
+                }
 
                 defaults.forEach(roomId => {
                     this.usersRepository.addRoom(user.id, roomId)

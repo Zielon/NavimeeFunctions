@@ -11,6 +11,7 @@ import { ISerializable } from "../contracts/serializable";
 import FirestorePaths from "../consts/firestore-paths";
 import IFirestore from "../contracts/services/firestore-service";
 import { ISlackService } from "../contracts/services/slack-service";
+import { WriteResult } from "@google-cloud/firestore";
 
 export default class ChatSlack {
     private channel: string;
@@ -49,7 +50,7 @@ export default class ChatSlack {
         });
     }
 
-    private setObject<T extends ISerializable>(message: T): Promise<void> {
+    private setObject<T extends ISerializable>(message: T): Promise<WriteResult> {
         return this.firestore.get()
                 .collection(FirestorePaths.messagesGroups)
                 .doc(FirestorePaths.country)

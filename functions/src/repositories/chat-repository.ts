@@ -11,17 +11,18 @@ import IChatRepository from "../contracts/repositories/chat";
 import Room from "../models/entities/chat/room";
 import Member from "../models/entities/chat/member";
 import User from "../models/entities/user";
+import { WriteResult } from "@google-cloud/firestore";
 
 @injectable()
 export default class ChatRepository implements IChatRepository {
 
     @inject(TYPES.IFirestore) private firestore: IFirestore;
 
-    public async getRoom(id: string): Promise<Room> {
+    public async getRoom(id: string, user: User): Promise<Room> {
         return new Promise<Room>(async (resolve, reject) => {
             const ref = this.firestore.get()
                 .collection(FirestorePaths.group)
-                .doc(FirestorePaths.country)
+                .doc(user.country)
                 .collection(id)
                 .doc(FirestorePaths.roomDetails);
 
@@ -38,26 +39,27 @@ export default class ChatRepository implements IChatRepository {
         });
     }
 
-    public async getRooms(): Promise<Array<Room>> {
+    public async getRooms(user: User): Promise<Array<Room>> {
         return new Promise<Array<Room>>(async (resolve, reject) => {
             const ref = this.firestore.get()
                 .collection(FirestorePaths.group)
-                .doc(FirestorePaths.country);
+                .doc(user.country);
 
-            const rooms = await ref.getCollections();
-            const result = new Array<Room>();
-
-            rooms.forEach(async collection => {
-                const room = await ref.collection(collection.id).doc(FirestorePaths.roomDetails).get();
-                if (!room.exists) reject();
-                result.push(plainToClass(Room, room.data() as Object));
+            const collections = await ref.getCollections();
+            const promises = collections.map(async collection => {
+                return new Promise<Room>(async (roomResolve) => {
+                    const room = await ref.collection(collection.id).doc(FirestorePaths.roomDetails).get();
+                    roomResolve(plainToClass(Room, room.data() as Object));
+                });
             });
 
-            resolve(result);
+            return Promise.all(promises).then(rooms => {
+                resolve(rooms);
+            });
         });
     }
 
-    public async addMember(roomId: string, user: User): Promise<void> {
+    public async addMember(roomId: string, user: User): Promise<WriteResult> {
         const member = new Member();
         member.memberId = user.id;
         member.notification = true;
