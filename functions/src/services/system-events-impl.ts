@@ -20,7 +20,6 @@ export default class SystemEvents implements ISystemEvents {
     public startOnFirstOpenEventListener(): any{
         return functions.analytics.event('first_open').onLog(async event =>{
             const uid = event.data.user.userId;
-            const appVerion = event.data.user.appInfo.appVersion;
             console.log(uid);
         });
     }
@@ -28,11 +27,10 @@ export default class SystemEvents implements ISystemEvents {
     public startOnAppRemoveEventListener() {
         return functions.analytics.event('app_remove').onLog(async event =>{
             const uid = event.data.user.userId;
-            const appVerion = event.data.user.appInfo.appVersion;
             const user = await this.usersRepository.getUser(uid);
             const path = `${FirestorePaths.usersLocation}/${user.driverType}_${user.id}`;
-            
-            console.log("A removal of " + path);
+
+            console.log("A removal of: " + path);
 
             admin.database().ref(path).remove();
         });
