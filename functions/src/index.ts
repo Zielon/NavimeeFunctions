@@ -35,3 +35,4 @@ export const onCreateGroupsListener = chatNotifier.createDefaultGroups();
 const systemEvents = container.get<ISystemEvents>(TYPES.ISystemEvents);
 
 export const onSystemFirstOpenListener = systemEvents.startOnFirstOpenEventListener();
+export const onSystemAppRemoveListener = systemEvents.startOnAppRemoveEventListener();

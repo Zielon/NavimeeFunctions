@@ -10,4 +10,5 @@ export default class FirestorePaths{
     public static readonly members = 'MEMBERS';
     public static readonly roomDetails = 'ROOM_DETAILS';
     public static readonly country = 'POLAND';
+    public static readonly usersLocation = 'USERS_LOCATION';
 }

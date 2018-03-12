@@ -3,8 +3,8 @@
   "description": "",
   "dependencies": {
     "@firebase/firestore": "^0.3.2",
-    "@google-cloud/firestore": "^0.11.2",
     "@types/firebase": "^3.2.1",
+    "@google-cloud/firestore": "^0.11.2",
     "class-transformer": "^0.1.9",
     "cors": "^2.8.1",
     "dateformat": "3.0.2",

@@ -1,5 +1,6 @@
 import { Firestore } from "@google-cloud/firestore";
+import * as functions from 'firebase-functions'
 
 export default interface IFirestore {
-    get(): Firestore;
+    getFirestore(): Firestore;
 }

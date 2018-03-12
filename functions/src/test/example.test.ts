@@ -4,7 +4,6 @@ import * as functions from 'firebase-functions'
 
 import FirestoreBase from './firestore'
 import FirestorePaths from '../consts/firestore-paths'
-import ChatSlack from '../chat/chat-slack'
 
 describe('Firestore initialization tests', () => {
   before(() => {
@@ -13,12 +12,12 @@ describe('Firestore initialization tests', () => {
 
   describe('Get sample data from AvailableCity collection', async () => {
     it('Gdansk exists', async () => {
-      let documnet = await FirestoreBase.getFirestore()
+      const document = await FirestoreBase.getFirestore()
         .collection(FirestorePaths.availableCities)
         .doc(FirestorePaths.byCity)
         .collection('GDANSK').doc('2261011').get();
 
-      expect(documnet.exists).to.equal(true);
+      expect(document.exists).to.equal(true);
     });
   });
 });

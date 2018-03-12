@@ -5,6 +5,6 @@ import { WriteResult } from "@google-cloud/firestore";
 
 export default interface IChatRepository {
     getRoom(id: string, user: User): Promise<Room>
-    getRooms(user: User): Promise<Array<Room>>
+    getRooms(country: string): Promise<Array<Room>>
     addMember(roomId: string, user: User): Promise<WriteResult>
 }

@@ -7,7 +7,7 @@ import { Firestore } from "@google-cloud/firestore";
 
 @injectable()
 export default class FirestoreService implements IFirestore {
-    get() : Firestore {
+    public getFirestore() : Firestore {
         let referenece = null;
         try {
             referenece = admin.firestore();

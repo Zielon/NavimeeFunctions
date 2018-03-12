@@ -60,7 +60,7 @@ export default class SlackService implements ISlackService {
     }
 
     private setObject<T extends ISerializable>(message: T, channel: string): Promise<WriteResult> {
-        return this.firestore.get()
+        return this.firestore.getFirestore()
             .collection(FirestorePaths.messagesGroups)
             .doc(FirestorePaths.country)
             .collection(channel)

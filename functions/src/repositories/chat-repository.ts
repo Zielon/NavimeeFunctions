@@ -12,6 +12,7 @@ import Room from "../models/entities/chat/room";
 import Member from "../models/entities/chat/member";
 import User from "../models/entities/user";
 import { WriteResult } from "@google-cloud/firestore";
+import { isNullOrUndefined } from "util";
 
 @injectable()
 export default class ChatRepository implements IChatRepository {
@@ -20,7 +21,7 @@ export default class ChatRepository implements IChatRepository {
 
     public async getRoom(id: string, user: User): Promise<Room> {
         return new Promise<Room>(async (resolve, reject) => {
-            const ref = this.firestore.get()
+            const ref = this.firestore.getFirestore()
                 .collection(FirestorePaths.group)
                 .doc(user.country)
                 .collection(id)
@@ -39,11 +40,11 @@ export default class ChatRepository implements IChatRepository {
         });
     }
 
-    public async getRooms(user: User): Promise<Array<Room>> {
+    public async getRooms(country: string): Promise<Array<Room>> {
         return new Promise<Array<Room>>(async (resolve, reject) => {
-            const ref = this.firestore.get()
+            const ref = this.firestore.getFirestore()
                 .collection(FirestorePaths.group)
-                .doc(user.country);
+                .doc(country);
 
             const collections = await ref.getCollections();
             const promises = collections.map(async collection => {
@@ -54,7 +55,7 @@ export default class ChatRepository implements IChatRepository {
             });
 
             return Promise.all(promises).then(rooms => {
-                resolve(rooms);
+                resolve(rooms.filter(room => !isNullOrUndefined(room)));
             });
         });
     }
@@ -64,7 +65,7 @@ export default class ChatRepository implements IChatRepository {
         member.memberId = user.id;
         member.notification = true;
 
-        return this.firestore.get()
+        return this.firestore.getFirestore()
             .collection(FirestorePaths.group)
             .doc(user.country)
             .collection(roomId)

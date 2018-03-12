@@ -13,6 +13,7 @@ export default class User implements ISerializable{
     public token: string;
     public city: string;
     public country: string;
+    public driverType: string;
 
     // Settings
     public bigEventsNotification: boolean;

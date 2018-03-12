@@ -16,6 +16,7 @@ import IFirestore from "../contracts/services/firestore-service";
 import IChatRepository from "../contracts/repositories/chat";
 import FcmTypes from "../consts/fcm-types";
 import Member from "../models/entities/chat/member";
+import ChatCountryFilters from "../consts/chat-filters";
 
 @injectable()
 export default class ChatNotifier implements IChatNotifier {
@@ -70,14 +71,16 @@ export default class ChatNotifier implements IChatNotifier {
                 const user = plainToClass(User, event.data.data() as Object)
 
                 const defaults = ['DRIVELY', 'OGOLNY'];
-                const rooms = await this.chatRepository.getRooms(user);
-                const room = rooms.filter(r => r.name.toUpperCase() === user.city.toUpperCase());
+                const rooms = await this.chatRepository.getRooms(user.country);
+
+                const cityFilter = new ChatCountryFilters().getFilter(user.country, user.city);
+                const room = rooms.filter(cityFilter);
 
                 // Each city has it's own channle to advertisements.
                 if (room.length > 0) {
                     const roomId = room.shift().id.trim();
                     defaults.push(roomId)
-                    defaults.push(roomId + '_OGLOSZENIA')
+                    defaults.push(roomId + '_OFERTY')
                 }
 
                 defaults.forEach(roomId => {
