@@ -7,7 +7,8 @@ const TYPES = {
     IUsersRepository: Symbol("IUsersRepository"),
     IFirestore: Symbol("IFirestore"),
     IChatRepository: Symbol("IChatRepository"),
-    ISystemEvents: Symbol("ISystemEvents")
+    ISystemEvents: Symbol("ISystemEvents"),
+    IUserAuth: Symbol("IUserAuth")
 }
 
 export default TYPES;

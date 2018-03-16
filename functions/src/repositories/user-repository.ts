@@ -15,6 +15,30 @@ export default class UsersRepository implements IUsersRepository {
 
     @inject(TYPES.IFirestore) private firestore: IFirestore;
 
+    public getFrineds(id: string): Promise<string[]> {
+        return new Promise<string[]>(async (resolve, reject) => {
+            const groups = await this.firestore.getFirestore()
+                .collection(FirestorePaths.users)
+                .doc(id)
+                .collection(FirestorePaths.group).get();
+            const result = new Array<string>();
+            groups.forEach(group => result.push(group.id));
+            resolve(result);
+        });
+    }
+
+    public getRooms(id: string): Promise<string[]> {
+        return new Promise<string[]>(async (resolve, reject) => {
+            const friends = await this.firestore.getFirestore()
+                .collection(FirestorePaths.users)
+                .doc(id)
+                .collection(FirestorePaths.friends).get();
+            const result = new Array<string>();
+            friends.forEach(friend => result.push(friend.id));
+            resolve(result);
+        });
+    }
+
     public async getUser(id: string): Promise<User> {
         return new Promise<User>(async (resolve, reject) => {
             const user = await this.firestore.getFirestore().collection(FirestorePaths.users).doc(id).get();

@@ -16,6 +16,8 @@ import ChatRepository from "./repositories/chat-repository";
 import IChatRepository from "./contracts/repositories/chat";
 import SystemEvents from "./services/system-events-impl";
 import ISystemEvents from "./contracts/services/system-events";
+import IUserAuth from "./contracts/services/user-auth";
+import UserAuth from "./services/user-auth-impl";
 
 const container = new Container();
 
@@ -24,7 +26,8 @@ container.bind<IFcmService>(TYPES.IFcmService).to(FcmService);
 container.bind<IChatNotifier>(TYPES.IChatNotifier).to(ChatNotifier);
 container.bind<ISlackService>(TYPES.ISlackService).to(SlackService);
 container.bind<IFirestore>(TYPES.IFirestore).to(FirestoreService);
-container.bind<ISystemEvents>(TYPES.ISystemEvents).to(SystemEvents)
+container.bind<ISystemEvents>(TYPES.ISystemEvents).to(SystemEvents);
+container.bind<IUserAuth>(TYPES.IUserAuth).to(UserAuth);
 
 // REPOSITORIES
 container.bind<IUsersRepository>(TYPES.IUsersRepository).to(UsersRepository);

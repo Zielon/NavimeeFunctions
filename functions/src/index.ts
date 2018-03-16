@@ -9,6 +9,8 @@ import IChatNotifier from "./contracts/services/chat-notifier";
 import SystemEvents from './services/system-events-impl';
 import ISystemEvents from './contracts/services/system-events';
 import ISlackService from './contracts/services/slack-service';
+import IUserAuth from './contracts/services/user-auth';
+import { user } from 'firebase-functions/lib/providers/auth';
 
 const slackChannels = [
     new SlackChannel("Ogólny", "eMdEbXYPDF4PIWZTlcn9Vy96", "OGOLNY", functions.config().slack.url_general),
@@ -36,3 +38,9 @@ const systemEvents = container.get<ISystemEvents>(TYPES.ISystemEvents);
 
 export const onSystemFirstOpenListener = systemEvents.startOnFirstOpenEventListener();
 export const onSystemAppRemoveListener = systemEvents.startOnAppRemoveEventListener();
+
+// USERS
+const usersAuth = container.get<IUserAuth>(TYPES.IUserAuth);
+
+export const onAuthCreateListener = usersAuth.startOnAuthCreateListener();
+export const onAuthDeleteListene = usersAuth.startOnAuthDeleteListener();
