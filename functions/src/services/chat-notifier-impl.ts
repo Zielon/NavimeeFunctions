@@ -17,6 +17,7 @@ import IChatRepository from "../contracts/repositories/chat";
 import FcmTypes from "../consts/fcm-types";
 import Member from "../models/entities/chat/member";
 import ChatCountryFilters from "../consts/chat-filters";
+import { resolve } from "url";
 
 @injectable()
 export default class ChatNotifier implements IChatNotifier {
@@ -32,16 +33,17 @@ export default class ChatNotifier implements IChatNotifier {
                 const roomId = event.params.roomId as string;
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
-
                 const sender = await this.usersRepository.getUser(message.idSender);
                 const room = await this.chatRepository.getRoom(roomId, sender);
 
                 room.members.forEach(async member => {
-                    const receiver = await this.usersRepository.getUser(member.memberId);
-                    const payload = new FcmPayload(message, { avatar: sender.avatar, type: FcmTypes.MESSAGE_GROUP_TYPE, roomName: room.name });
-
-                    if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id && receiver.chatGroupNotification)
-                        this.fcmService.sendToSingle(payload, receiver.token);
+                    new Promise<void>(async (success, failure) => {
+                        const receiver = await this.usersRepository.getUser(member.memberId);
+                        console.log(receiver)
+                        const payload = new FcmPayload(message, { avatar: sender.avatar, type: FcmTypes.MESSAGE_GROUP_TYPE, roomName: room.name });
+                        if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id && receiver.chatGroupNotification)
+                            this.fcmService.sendToSingle(payload, receiver.token).then(() => success()).catch(() => failure());
+                    })
                 });
 
                 return null;

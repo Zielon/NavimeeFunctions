@@ -34,8 +34,11 @@ export default class ChatRepository implements IChatRepository {
             const result = plainToClass(Room, room.data() as Object)
             result.members = new Array<Member>();
             const members = await ref.collection(FirestorePaths.members).get();
-            members.forEach(member => result.members.push(plainToClass(Member, member.data() as Object)));
-
+            members.forEach(member => {
+                try {
+                    result.members.push(plainToClass(Member, member.data() as Object))
+                } catch (error) {/* ignore */ }
+            });
             resolve(result);
         });
     }
