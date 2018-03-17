@@ -39,7 +39,6 @@ export default class ChatNotifier implements IChatNotifier {
                 room.members.forEach(async member => {
                     new Promise<void>(async (success, failure) => {
                         const receiver = await this.usersRepository.getUser(member.memberId);
-                        console.log(receiver)
                         const payload = new FcmPayload(message, { avatar: sender.avatar, type: FcmTypes.MESSAGE_GROUP_TYPE, roomName: room.name });
                         if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id && receiver.chatGroupNotification)
                             this.fcmService.sendToSingle(payload, receiver.token).then(() => success()).catch(() => failure());
