@@ -12,6 +12,9 @@ export default class Message implements ISerializable {
     public text: string;
 
     @Transform(value => value.toString())
+    public deleted: boolean;
+
+    @Transform(value => value.toString())
     public timestamp: number;
 
     public serialize(): any {

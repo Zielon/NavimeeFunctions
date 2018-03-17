@@ -43,6 +43,8 @@ export default class ChatNotifier implements IChatNotifier {
                     if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id && receiver.chatGroupNotification)
                         this.fcmService.sendToSingle(payload, receiver.token);
                 });
+
+                return null;
             });
     }
 
@@ -60,6 +62,8 @@ export default class ChatNotifier implements IChatNotifier {
 
                 if (receiver.token && receiver.token.length > 0 && receiver.chatPrivateNotification)
                     this.fcmService.sendToSingle(payload, receiver.token);
+
+                return null;
             });
     }
 

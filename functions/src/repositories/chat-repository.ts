@@ -73,4 +73,65 @@ export default class ChatRepository implements IChatRepository {
             .collection(FirestorePaths.members)
             .doc(user.id).set(member.serialize());
     }
+
+    public async deleteFromGroup(user: User, groups: Array<string>): Promise<void> {
+        return new Promise<void>(async (resolve, reject) => {
+            const promises = groups.map(group => {
+                return this.firestore.getFirestore()
+                    .collection(FirestorePaths.group)
+                    .doc(user.country)
+                    .collection(group)
+                    .doc(FirestorePaths.roomDetails)
+                    .collection(FirestorePaths.members)
+                    .doc(user.id).delete();
+            });
+            resolve();
+        });
+    }
+
+    public async deleteGroupMessages(user: User, groups: string[]): Promise<void> {
+        return new Promise<void>(async (resolve, reject) => {
+            groups.forEach(async group => {
+
+                const messanges = await this.firestore.getFirestore()
+                    .collection(FirestorePaths.messagesGroups)
+                    .doc(user.country)
+                    .collection(group)
+                    .where('idSender', '==', user.id).get();
+
+                messanges.forEach(async message => {
+                    this.firestore.getFirestore()
+                        .collection(FirestorePaths.messagesGroups)
+                        .doc(user.country)
+                        .collection(group)
+                        .doc(message.id).update({ deleted: true })
+                });
+            });
+            resolve();
+        });
+    }
+
+    public async deletePrivateMessages(user: User, friends: string[]): Promise<void> {
+        return new Promise<void>(async (resolve, reject) => {
+            const promises = friends.map(friend => {
+                const collection = user.id.localeCompare(friend) > 0 ? friend + "|" + user.id : user.id + "|" + friend;
+                console.log(collection);
+                return this.firestore.deleteCollection(`${FirestorePaths.messagesPrivate}/${user.country}/${collection}`);
+            });
+            resolve();
+        });
+    }
+
+    public async deleteFromFriends(userId: string, friends: Array<string>): Promise<void> {
+        return new Promise<void>(async (resolve, reject) => {
+            const promises = friends.map(friend => {
+                return this.firestore.getFirestore()
+                    .collection(FirestorePaths.users)
+                    .doc(friend)
+                    .collection(FirestorePaths.friends)
+                    .doc(userId).delete();
+            });
+            resolve();
+        });
+    }
 }

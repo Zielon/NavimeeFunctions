@@ -9,13 +9,14 @@ import IUsersRepository from "../contracts/repositories/users";
 import User from "../models/entities/user";
 import TYPES from "../types";
 import IFirestore from "../contracts/services/firestore-service";
+import { WriteResult } from "@google-cloud/firestore";
 
 @injectable()
 export default class UsersRepository implements IUsersRepository {
 
     @inject(TYPES.IFirestore) private firestore: IFirestore;
 
-    public getFrineds(id: string): Promise<string[]> {
+    public getRooms(id: string): Promise<string[]> {
         return new Promise<string[]>(async (resolve, reject) => {
             const groups = await this.firestore.getFirestore()
                 .collection(FirestorePaths.users)
@@ -27,7 +28,7 @@ export default class UsersRepository implements IUsersRepository {
         });
     }
 
-    public getRooms(id: string): Promise<string[]> {
+    public getFrineds(id: string): Promise<string[]> {
         return new Promise<string[]>(async (resolve, reject) => {
             const friends = await this.firestore.getFirestore()
                 .collection(FirestorePaths.users)
@@ -47,13 +48,19 @@ export default class UsersRepository implements IUsersRepository {
         });
     }
 
-    public async addRoom(userId: string, roomId: string): Promise<void> {
-        return new Promise<void>(async (resolve, reject) => {
-            return this.firestore.getFirestore()
-                .collection(FirestorePaths.users)
-                .doc(userId)
-                .collection(FirestorePaths.group)
-                .doc(roomId).set({ roomId: roomId });
-        });
+    public async addRoom(userId: string, roomId: string): Promise<WriteResult> {
+        return this.firestore.getFirestore()
+            .collection(FirestorePaths.users)
+            .doc(userId)
+            .collection(FirestorePaths.group)
+            .doc(roomId).set({ roomId: roomId });
+    }
+
+    public async deleteUser(id: string): Promise<WriteResult> {
+        this.firestore.deleteCollection(`${FirestorePaths.users}/${id}/${FirestorePaths.group}`)
+        this.firestore.deleteCollection(`${FirestorePaths.users}/${id}/${FirestorePaths.friends}`)
+        return this.firestore.getFirestore()
+            .collection(FirestorePaths.users)
+            .doc(id).delete();
     }
 }
