@@ -36,13 +36,12 @@ export default class UserAuth implements IUserAuth {
     startOnAuthCreateListener() {
         return functions.auth.user().onCreate(async (event) => {
             this.storageRepository.downloadFile("TEMPLATES/WELCOME.html").then(async file => {
-                const buffer = file["0"];
-                const template = buffer.toString('utf8');
+                const template = file["0"].toString('utf8');
                 const user = event.data;
                 const mail = {
-                    from: functions.config().gmail.email,
+                    from: `Drively <${functions.config().gmail.email}>`,
                     to: user.email,
-                    subject: 'Cześć, tutaj Drively.',
+                    subject: 'Witamy na pokładzie',
                     html: template
                 }
                 this.emailServie.send(mail);
