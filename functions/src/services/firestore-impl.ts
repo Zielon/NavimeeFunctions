@@ -4,6 +4,7 @@ import * as admin from 'firebase-admin'
 import { injectable, inject } from "inversify";
 import * as functions from 'firebase-functions'
 import { Firestore } from "@google-cloud/firestore";
+import { Bucket } from "@google-cloud/storage";
 
 @injectable()
 export default class FirestoreService implements IFirestore {
@@ -14,6 +15,17 @@ export default class FirestoreService implements IFirestore {
         } catch (error) {
             admin.initializeApp(functions.config().firebase);
             referenece = admin.firestore();
+        }
+        return referenece;
+    }
+
+    public getBucket(): Bucket {
+        let referenece = null;
+        try {
+            referenece = admin.storage().bucket();
+        } catch (error) {
+            admin.initializeApp(functions.config().firebase);
+            referenece = admin.storage().bucket();
         }
         return referenece;
     }

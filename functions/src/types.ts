@@ -8,7 +8,9 @@ const TYPES = {
     IFirestore: Symbol("IFirestore"),
     IChatRepository: Symbol("IChatRepository"),
     ISystemEvents: Symbol("ISystemEvents"),
-    IUserAuth: Symbol("IUserAuth")
+    IUserAuth: Symbol("IUserAuth"),
+    IEmailService: Symbol("IEmailService"),
+    IStorageRepository: Symbol("IStorageRepository")
 }
 
 export default TYPES;
