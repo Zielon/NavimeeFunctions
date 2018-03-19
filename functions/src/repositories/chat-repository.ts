@@ -19,17 +19,17 @@ export default class ChatRepository implements IChatRepository {
 
     @inject(TYPES.IFirestore) private firestore: IFirestore;
 
-    public async getRoom(id: string, user: User): Promise<Room> {
+    public async getRoom(id: string, country: string): Promise<Room> {
         return new Promise<Room>(async (resolve, reject) => {
             const ref = this.firestore.getFirestore()
                 .collection(FirestorePaths.group)
-                .doc(user.country)
+                .doc(country)
                 .collection(id)
                 .doc(FirestorePaths.roomDetails);
 
             const room = await ref.get();
 
-            if (!room.exists) reject();
+            if (!room.exists) reject(`Room ${id} in country ${country} does not exist`);
 
             const result = plainToClass(Room, room.data() as Object)
             result.members = new Array<Member>();

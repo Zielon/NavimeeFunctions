@@ -43,7 +43,7 @@ export default class UsersRepository implements IUsersRepository {
     public async getUser(id: string): Promise<User> {
         return new Promise<User>(async (resolve, reject) => {
             const user = await this.firestore.getFirestore().collection(FirestorePaths.users).doc(id).get();
-            if (!user.exists) reject();
+            if (!user.exists) reject(`User: ${id} does not exist`);
             resolve(plainToClass(User, user.data() as Object));
         });
     }

@@ -4,7 +4,7 @@ import User from "../../models/entities/user";
 import { WriteResult } from "@google-cloud/firestore";
 
 export default interface IChatRepository {
-    getRoom(id: string, user: User): Promise<Room>
+    getRoom(id: string, country: string): Promise<Room>
     getRooms(country: string): Promise<Array<Room>>
     addMember(roomId: string, user: User): Promise<WriteResult>
     deleteFromGroup(user: User, groups: Array<string>): Promise<void>
