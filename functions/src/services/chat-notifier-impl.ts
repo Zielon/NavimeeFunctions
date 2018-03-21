@@ -37,7 +37,7 @@ export default class ChatNotifier implements IChatNotifier {
                 const room = await this.chatRepository.getRoom(roomId, sender.country);
 
                 const payload = new FcmPayload(message, { avatar: sender.avatar, type: FcmTypes.MESSAGE_GROUP_TYPE, roomName: room.name });
-                this.fcmService.sendToTopic(payload, room.id).catch(error => console.log(error));
+                return this.fcmService.sendToTopic(payload, room.id).catch(error => console.log(error));
             });
     }
 
@@ -54,7 +54,7 @@ export default class ChatNotifier implements IChatNotifier {
                 const payload = new FcmPayload(message, { avatar: sender.avatar, type: FcmTypes.MESSAGE_PRIVATE_TYPE });
 
                 if (receiver.token && receiver.token.length > 0 && receiver.chatPrivateNotification)
-                    this.fcmService.sendToSingle(payload, receiver.token);
+                    return this.fcmService.sendToDevice(payload, receiver.token);
 
                 return null;
             });
