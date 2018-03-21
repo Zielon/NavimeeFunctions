@@ -85,6 +85,7 @@ export default class ChatNotifier implements IChatNotifier {
                     await this.usersRepository.addRoom(user.id, roomId)
                 });
                 
+                // Add also the historical rooms
                 const userRooms = await this.usersRepository.getRooms(user.id);
                 userRooms.forEach(userRoom => {
                     if(!user.chatGroupNotification)
