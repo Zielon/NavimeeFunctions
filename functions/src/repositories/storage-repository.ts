@@ -18,6 +18,13 @@ export default class StorageRepository implements IStorageRepository {
 
     public async downloadFile(filePath): Promise<[Buffer]> {
         const bucket = this.firestore.getBucket();
+        console.log("Download file: " + filePath);
         return bucket.file(filePath).download();
+    }
+
+    public async deleteFile(filePath: string): Promise<[ApiResponse]> {
+        const bucket = this.firestore.getBucket();
+        console.log("Delete file: " + filePath);
+        return bucket.file(filePath).delete();
     }
 }

@@ -17,7 +17,7 @@ export default class UserAuth implements IUserAuth {
     @inject(TYPES.IStorageRepository) private storageRepository: IStorageRepository;
     @inject(TYPES.IEmailService) private emailServie: IEmailService;
 
-    startOnAuthDeleteListener() {
+    public startOnAuthDeleteListener() {
         return functions.auth.user().onDelete(async (event) => {
             const userId = event.data.uid;
             const user = await this.usersRepository.getUser(userId);
@@ -29,11 +29,13 @@ export default class UserAuth implements IUserAuth {
             this.chatRepository.deleteFromGroup(user, rooms);
             this.chatRepository.deleteGroupMessages(user, rooms);
             this.chatRepository.deletePrivateMessages(user, friends);
+            if(user.avatar !== 'DEFAULT')
+                this.storageRepository.deleteFile(`AVATARS/${user.avatar}`).catch(error => console.log(error));
             this.usersRepository.deleteUser(userId);
         });
     }
 
-    startOnAuthCreateListener() {
+    public startOnAuthCreateListener() {
         return functions.auth.user().onCreate(async (event) => {
             this.storageRepository.downloadFile("TEMPLATES/WELCOME.html").then(async file => {
                 const template = file["0"].toString('utf8');
