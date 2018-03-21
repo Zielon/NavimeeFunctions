@@ -19,7 +19,7 @@ export default class FcmService implements IFcmService {
         });
     };
 
-    public sendToMany<T extends ISerializable>(payload: T, tokens: string[]): Promise<any> {
-        throw Error("Not implemeneted");
+    public sendToTopic<T extends ISerializable>(payload: T, topic:string): Promise<any> {
+        return admin.messaging().sendToTopic(topic, payload.serialize());
     };
 }

@@ -34,18 +34,10 @@ export default class ChatNotifier implements IChatNotifier {
                 const messageId = event.params.messageId;
                 const message = plainToClass(Message, event.data.data() as Object)
                 const sender = await this.usersRepository.getUser(message.idSender);
+                const room = await this.chatRepository.getRoom(roomId, sender.country);
 
-                return this.chatRepository.getRoom(roomId, sender.country).then(room => {
-                    room.members.forEach(async member => {
-                        new Promise<void>(async (success, failure) => {
-                            this.usersRepository.getUser(member.memberId).then(receiver => {
-                                const payload = new FcmPayload(message, { avatar: sender.avatar, type: FcmTypes.MESSAGE_GROUP_TYPE, roomName: room.name });
-                                if (receiver.token && receiver.token.length > 0 && receiver.id !== sender.id && receiver.chatGroupNotification)
-                                    this.fcmService.sendToSingle(payload, receiver.token).then(() => success()).catch(() => failure());
-                            }).catch(error => console.log(error));
-                        });
-                    });
-                }).catch(error => console.log(error));
+                const payload = new FcmPayload(message, { avatar: sender.avatar, type: FcmTypes.MESSAGE_GROUP_TYPE, roomName: room.name });
+                this.fcmService.sendToTopic(payload, room.id).catch(error => console.log(error));
             });
     }
 
@@ -88,10 +80,18 @@ export default class ChatNotifier implements IChatNotifier {
                     defaults.push(roomId + '_OFERTY')
                 }
 
-                defaults.forEach(roomId => {
-                    this.usersRepository.addRoom(user.id, roomId)
-                    this.chatRepository.addMember(roomId, user);
+                defaults.forEach(async roomId => {
+                    await this.chatRepository.addMember(roomId, user);
+                    await this.usersRepository.addRoom(user.id, roomId)
                 });
+                
+                const userRooms = await this.usersRepository.getRooms(user.id);
+                userRooms.forEach(userRoom => {
+                    if(!user.chatGroupNotification)
+                        admin.messaging().unsubscribeFromTopic(user.token, userRoom)
+                    else
+                        admin.messaging().subscribeToTopic(user.token, userRoom)
+                })
 
                 return null;
             });

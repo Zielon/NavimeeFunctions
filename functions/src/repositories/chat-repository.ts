@@ -31,15 +31,7 @@ export default class ChatRepository implements IChatRepository {
 
             if (!room.exists) reject(`Room ${id} in country ${country} does not exist`);
 
-            const result = plainToClass(Room, room.data() as Object)
-            result.members = new Array<Member>();
-            const members = await ref.collection(FirestorePaths.members).get();
-            members.forEach(member => {
-                try {
-                    result.members.push(plainToClass(Member, member.data() as Object))
-                } catch (error) {/* ignore */ }
-            });
-            resolve(result);
+            resolve(plainToClass(Room, room.data() as Object));
         });
     }
 
@@ -95,6 +87,8 @@ export default class ChatRepository implements IChatRepository {
     public async deleteGroupMessages(user: User, groups: string[]): Promise<void> {
         return new Promise<void>(async (resolve, reject) => {
             groups.forEach(async group => {
+
+                admin.messaging().unsubscribeFromTopic(user.token, group);
 
                 const messanges = await this.firestore.getFirestore()
                     .collection(FirestorePaths.messagesGroups)

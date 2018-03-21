@@ -7,7 +7,6 @@ export default class Room implements ISerializable {
     public name: string;
     public id: string;
     public editable: boolean;
-    public members: Array<Member>;
 
     public serialize(): any {
         return classToPlain(this);
