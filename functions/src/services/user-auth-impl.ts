@@ -29,8 +29,7 @@ export default class UserAuth implements IUserAuth {
             this.chatRepository.deleteFromGroup(user, rooms);
             this.chatRepository.deleteGroupMessages(user, rooms);
             this.chatRepository.deletePrivateMessages(user, friends);
-            if(user.avatar !== 'DEFAULT')
-                this.storageRepository.deleteFile(`AVATARS/${user.avatar}`).catch(error => console.log(error));
+            this.storageRepository.deleteFile(`AVATARS/${user.id}`).catch(error => console.log(error));
             this.usersRepository.deleteUser(userId);
         });
     }

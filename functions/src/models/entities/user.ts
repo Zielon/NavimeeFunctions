@@ -4,7 +4,6 @@ import { classToPlain } from "class-transformer";
 // The entity form the collection USERS
 
 export default class User implements ISerializable{
-    public avatar: string;
     public email: string;
     public id: string;
     public isOnline: boolean;
