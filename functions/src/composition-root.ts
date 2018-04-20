@@ -22,6 +22,8 @@ import IEmailService from "./contracts/services/email-service";
 import EmailService from "./services/email-service-impl";
 import IStorageRepository from "./contracts/repositories/storage";
 import StorageRepository from "./repositories/storage-repository";
+import IExpensesRepository from "./contracts/repositories/expenses";
+import ExpensesRepository from "./repositories/expenses-repository";
 
 const container = new Container();
 
@@ -38,5 +40,6 @@ container.bind<IEmailService>(TYPES.IEmailService).to(EmailService);
 container.bind<IUsersRepository>(TYPES.IUsersRepository).to(UsersRepository);
 container.bind<IChatRepository>(TYPES.IChatRepository).to(ChatRepository);
 container.bind<IStorageRepository>(TYPES.IStorageRepository).to(StorageRepository);
+container.bind<IExpensesRepository>(TYPES.IExpensesRepository).to(ExpensesRepository);
 
 export default container;

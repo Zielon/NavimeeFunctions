@@ -8,6 +8,7 @@ import * as functions from 'firebase-functions'
 import IChatRepository from "../contracts/repositories/chat";
 import IEmailService from "../contracts/services/email-service";
 import IStorageRepository from "../contracts/repositories/storage";
+import IExpensesRepository from "../contracts/repositories/expenses";
 
 @injectable()
 export default class UserAuth implements IUserAuth {
@@ -16,6 +17,7 @@ export default class UserAuth implements IUserAuth {
     @inject(TYPES.IChatRepository) private chatRepository: IChatRepository;
     @inject(TYPES.IStorageRepository) private storageRepository: IStorageRepository;
     @inject(TYPES.IEmailService) private emailServie: IEmailService;
+    @inject(TYPES.IExpensesRepository) private expensesRepository: IExpensesRepository;
 
     public startOnAuthDeleteListener() {
         return functions.auth.user().onDelete(async (event) => {
@@ -25,6 +27,7 @@ export default class UserAuth implements IUserAuth {
             const friends = await this.usersRepository.getFrineds(userId);
 
             // Delete from every possible collections
+            this.expensesRepository.deleteExpenses(user);
             this.chatRepository.deleteFromFriends(userId, friends);
             this.chatRepository.deleteFromGroup(user, rooms);
             this.chatRepository.deleteGroupMessages(user, rooms);

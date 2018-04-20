@@ -10,7 +10,8 @@ const TYPES = {
     ISystemEvents: Symbol("ISystemEvents"),
     IUserAuth: Symbol("IUserAuth"),
     IEmailService: Symbol("IEmailService"),
-    IStorageRepository: Symbol("IStorageRepository")
+    IStorageRepository: Symbol("IStorageRepository"),
+    IExpensesRepository: Symbol("IExpensesRepository")
 }
 
 export default TYPES;
