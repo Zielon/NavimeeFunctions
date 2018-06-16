@@ -1,4 +1,4 @@
-# NavimeeFunctions
+# Navimee Functions
 
 Drively Google cloud functions server
 
